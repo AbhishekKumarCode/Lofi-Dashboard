@@ -1,0 +1,2 @@
+rootProject.name = "LofiDashboard"
+include ':app'

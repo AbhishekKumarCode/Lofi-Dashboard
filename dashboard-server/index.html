@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no"/>
+<title>Lofi Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,300;0,400;0,600;0,700;1,300&family=Lora:ital,wght@0,400;0,600;1,400;1,600&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+<style>
+*,*:before,*:after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;font-family:"Josefin Sans",sans-serif;color:#ede8f5;background:#080610}
+
+.bg-image{position:fixed;top:0;left:0;right:0;bottom:0;z-index:0;background-image:url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1024&q=50');background-size:cover;background-position:center;-webkit-filter:blur(20px) brightness(0.16);filter:blur(20px) brightness(0.16)}
+.bg-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:1;background:rgba(8,4,18,0.82)}
+.blobs{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:2}
+.blob{position:absolute;border-radius:50%;opacity:0.07}
+.b1{width:300px;height:300px;background:#a78bfa;top:-70px;left:-70px;-webkit-filter:blur(70px);filter:blur(70px)}
+.b2{width:240px;height:240px;background:#f9a8d4;bottom:-50px;right:-50px;-webkit-filter:blur(70px);filter:blur(70px)}
+.b3{width:190px;height:190px;background:#6ee7b7;top:38%;left:55%;-webkit-filter:blur(70px);filter:blur(70px)}
+.rain{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:3;overflow:hidden}
+.drop{position:absolute;width:1px;background:-webkit-linear-gradient(top,transparent,rgba(196,181,253,0.2),transparent);background:linear-gradient(to bottom,transparent,rgba(196,181,253,0.2),transparent)}
+
+/* ════ MAIN GRID — matches your sketch exactly ════
+   Columns: [time+temp] [pc stats] [CATS spanning all 3 rows]
+   Row 1: time+temp | pc stats | cats (rowspan 2)
+   Row 2: timer     | week ahead| cats (continued)
+   Row 3: playbar (colspan 2) | visualizer
+*/
+.wrap{
+  position:relative;z-index:4;
+  width:100%;height:100%;
+  display:grid;
+  grid-template-columns: 1fr 1.4fr 1.3fr;
+  grid-template-rows: 1fr 1fr 1.1fr;
+  padding:12px;
+  gap:10px
+}
+
+/* ════ CARD ════ */
+.card{
+  background:rgba(26,16,46,0.9);
+  border:1px solid rgba(160,130,255,0.22);
+  border-radius:16px;
+  padding:14px 16px;
+  position:relative;
+  overflow:hidden;
+  min-width:0;min-height:0
+}
+.card:before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:-webkit-linear-gradient(left,transparent,rgba(180,150,255,0.32),transparent);background:linear-gradient(to right,transparent,rgba(180,150,255,0.32),transparent)}
+.lbl{font-size:8px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(180,160,230,0.35);margin-bottom:7px;font-weight:700;font-family:"Courier Prime",monospace}
+
+/* grid placement */
+.cell-time   { grid-column:1; grid-row:1; }
+.cell-stats  { grid-column:2; grid-row:1; }
+.cell-cats   { grid-column:3; grid-row:1 / span 2; } /* cats spans rows 1+2 */
+.cell-timer  { grid-column:1; grid-row:2; }
+.cell-week   { grid-column:2; grid-row:2; }
+.cell-play   { grid-column:1 / span 2; grid-row:3; } /* playbar spans cols 1+2 */
+.cell-viz    { grid-column:3; grid-row:3; }
+
+/* ════ TIME + TEMP ════ */
+.clock-wrap{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;height:100%;text-align:center;gap:3px}
+.clock-time{font-size:50px;font-weight:700;line-height:1;letter-spacing:0.04em;color:#c4b5fd;font-family:"Courier Prime",monospace}
+.clock-secs{font-size:18px;font-weight:400;color:rgba(196,181,253,0.36);font-family:"Courier Prime",monospace}
+.clock-date{font-size:11px;color:rgba(210,200,235,0.4);font-style:italic;font-family:"Lora",serif;margin-bottom:6px}
+.temp-row{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;gap:7px;margin-top:2px}
+.temp-icon{font-size:22px;line-height:1}
+.temp-val{font-size:28px;font-weight:700;color:#6ee7b7;font-family:"Courier Prime",monospace;line-height:1}
+.temp-desc{font-size:10px;color:rgba(210,200,235,0.38);font-style:italic;font-family:"Lora",serif}
+.temp-pills{display:-webkit-box;display:-webkit-flex;display:flex;gap:5px;margin-top:5px;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center}
+.pill{font-size:8px;padding:2px 8px;border-radius:20px;font-weight:600;font-family:"Courier Prime",monospace}
+
+/* ════ PC STATS ════ */
+.stat-row{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;gap:8px;margin-bottom:8px}
+.stat-row:last-child{margin-bottom:0}
+.stat-name{font-size:9px;color:rgba(180,160,230,0.38);width:30px;-webkit-flex-shrink:0;flex-shrink:0;font-weight:700;font-family:"Courier Prime",monospace}
+.stat-bg{-webkit-box-flex:1;-webkit-flex:1;flex:1;height:5px;background:rgba(255,255,255,0.07);border-radius:5px}
+.stat-fill{height:5px;border-radius:5px;-webkit-transition:width 1.5s ease;transition:width 1.5s ease}
+.stat-val{font-size:10px;width:32px;text-align:right;font-weight:700;font-family:"Courier Prime",monospace}
+
+/* ════ CATS — spans 2 rows, full height ════ */
+.cat-wrap{position:relative;width:100%;height:calc(100% - 22px);overflow:hidden;border-radius:12px;background:rgba(0,0,0,0.2)}
+.cat-img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;opacity:0;-webkit-transition:opacity 1.2s ease;transition:opacity 1.2s ease}
+.cat-img.active{opacity:1}
+.cat-dots{position:absolute;bottom:7px;left:50%;-webkit-transform:translateX(-50%);transform:translateX(-50%);display:-webkit-box;display:-webkit-flex;display:flex;gap:5px}
+.cat-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.15);-webkit-transition:background 0.4s;transition:background 0.4s}
+.cat-dot.on{background:#f9a8d4}
+
+/* ════ POMODORO ════ */
+.pom-wrap{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;gap:7px;height:calc(100% - 22px)}
+.pom-ring{width:62px;height:62px;border-radius:50%;border:2px solid rgba(196,181,253,0.22);display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center}
+.pom-num{font-size:18px;font-weight:700;color:#c4b5fd;line-height:1;font-family:"Courier Prime",monospace}
+.pom-sub{font-size:8.5px;color:rgba(180,160,230,0.3);font-weight:600;text-align:center}
+.pom-btn{font-size:9px;background:rgba(167,139,250,0.14);border:1px solid rgba(167,139,250,0.28);color:#c4b5fd;border-radius:20px;padding:4px 14px;cursor:pointer;font-family:"Josefin Sans",sans-serif;font-weight:700}
+
+/* ════ FORECAST ════ */
+.fc-row{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;gap:6px;margin-bottom:7px}
+.fc-row:last-child{margin-bottom:0}
+.fc-day{font-size:10px;color:rgba(180,160,230,0.45);font-weight:700;width:36px;-webkit-flex-shrink:0;flex-shrink:0;font-family:"Courier Prime",monospace}
+.fc-icon{font-size:13px;width:18px;-webkit-flex-shrink:0;flex-shrink:0}
+.fc-bar-bg{-webkit-box-flex:1;-webkit-flex:1;flex:1;height:5px;background:rgba(255,255,255,0.07);border-radius:5px;overflow:hidden}
+.fc-bar-fill{height:5px;border-radius:5px;background:-webkit-linear-gradient(left,#93c5fd,#f9a8d4,#fcd34d);background:linear-gradient(to right,#93c5fd,#f9a8d4,#fcd34d)}
+.fc-temps{font-size:10px;font-weight:700;color:#fcd34d;width:46px;text-align:right;-webkit-flex-shrink:0;flex-shrink:0;font-family:"Courier Prime",monospace}
+
+/* ════ MUSIC PLAYBAR ════ */
+.music-inner{display:-webkit-box;display:-webkit-flex;display:flex;gap:0;-webkit-box-align:center;-webkit-align-items:center;align-items:center;height:calc(100% - 22px)}
+.album-wrap{position:relative;-webkit-flex-shrink:0;flex-shrink:0;margin-right:22px}
+.album-img{width:118px;height:118px;border-radius:14px;object-fit:cover;display:block;border:2px solid rgba(160,130,255,0.25);background:rgba(167,139,250,0.15);-webkit-box-shadow:0 4px 24px rgba(167,139,250,0.25);box-shadow:0 4px 24px rgba(167,139,250,0.25)}
+/* overlay hidden always — removed pause icon */
+.album-paused-overlay{display:none}
+.track-info{-webkit-box-flex:1;-webkit-flex:1;flex:1;min-width:0;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;gap:10px}
+.track-name{font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ede8f5;font-family:"Josefin Sans",sans-serif;line-height:1.2}
+.track-artist{font-size:13px;color:rgba(210,200,235,0.48);font-style:italic;font-family:"Lora",serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.progress-bg{height:5px;background:rgba(255,255,255,0.08);border-radius:5px;width:100%}
+.progress-fill{height:5px;border-radius:5px;background:-webkit-linear-gradient(left,#a78bfa,#f9a8d4,#fcd34d);background:linear-gradient(to right,#a78bfa,#f9a8d4,#fcd34d);width:0%;-webkit-transition:width 0.5s linear;transition:width 0.5s linear}
+.controls{display:-webkit-box;display:-webkit-flex;display:flex;gap:18px;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center}
+.ctrl-btn{background:none;border:none;cursor:pointer;font-size:26px;color:rgba(210,200,235,0.4);padding:4px;line-height:1}
+.ctrl-btn.active{color:#c4b5fd;font-size:30px}
+.music-status{font-size:9px;color:rgba(180,160,230,0.26);font-weight:700;letter-spacing:0.08em;font-family:"Courier Prime",monospace}
+.music-status.live{color:#6ee7b7}
+
+/* ════ VISUALIZER ════ */
+.viz-inner{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;height:100%;-webkit-box-pack:end;-webkit-justify-content:flex-end;justify-content:flex-end;gap:8px}
+.viz-bars{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:flex-end;-webkit-align-items:flex-end;align-items:flex-end;gap:3px;-webkit-box-flex:1;-webkit-flex:1;flex:1}
+.viz-wave{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;gap:2px;height:26px}
+.vbar{-webkit-box-flex:1;-webkit-flex:1;flex:1;border-radius:4px 4px 0 0;min-height:3px;-webkit-transform-origin:bottom;transform-origin:bottom}
+.vbar.playing{-webkit-animation:vbounce ease-in-out infinite alternate;animation:vbounce ease-in-out infinite alternate;opacity:0.9}
+.vbar.paused{opacity:0.1;-webkit-transform:scaleY(0.05);transform:scaleY(0.05)}
+@-webkit-keyframes vbounce{from{-webkit-transform:scaleY(0.05)}to{-webkit-transform:scaleY(1)}}
+@keyframes vbounce{from{transform:scaleY(0.05)}to{transform:scaleY(1)}}
+.wbar{-webkit-box-flex:1;-webkit-flex:1;flex:1;border-radius:2px;background:rgba(167,139,250,0.35);min-height:2px;-webkit-transform-origin:center;transform-origin:center}
+.wbar.playing{-webkit-animation:wbounce ease-in-out infinite alternate;animation:wbounce ease-in-out infinite alternate}
+.wbar.paused{opacity:0.1;height:2px}
+@-webkit-keyframes wbounce{from{-webkit-transform:scaleY(0.1)}to{-webkit-transform:scaleY(1)}}
+@keyframes wbounce{from{transform:scaleY(0.1)}to{transform:scaleY(1)}}
+.mood-text{font-size:10px;font-style:italic;font-family:"Lora",serif;color:rgba(210,200,235,0.32);text-align:center;line-height:1.4}
+
+/* ════ CONN DOT ════ */
+.conn-dot{width:6px;height:6px;border-radius:50%;background:#6ee7b7;display:inline-block;margin-right:5px;vertical-align:middle}
+.conn-dot.offline{background:#fca5a5}
+</style>
+</head>
+<body>
+<div class="bg-image"></div>
+<div class="bg-overlay"></div>
+<div class="blobs"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+<div class="rain" id="rain"></div>
+
+<div class="wrap">
+
+  <!-- TIME + TEMP -->
+  <div class="card cell-time">
+    <div class="clock-wrap">
+      <div class="lbl">time &amp; weather</div>
+      <div class="clock-time" id="clock-display">--:--</div>
+      <div class="clock-secs" id="clock-secs">:--</div>
+      <div class="clock-date" id="clock-date">loading...</div>
+      <div class="temp-row">
+        <span class="temp-icon" id="w-icon">🌡</span>
+        <span class="temp-val" id="w-temp">--°</span>
+        <span class="temp-desc" id="w-desc"></span>
+      </div>
+      <div class="temp-pills">
+        <span class="pill" id="w-humidity" style="background:rgba(110,231,183,0.1);color:#6ee7b7;border:1px solid rgba(110,231,183,0.22)">--</span>
+        <span class="pill" id="w-wind" style="background:rgba(147,197,253,0.1);color:#93c5fd;border:1px solid rgba(147,197,253,0.22)">--</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PC STATS -->
+  <div class="card cell-stats">
+    <div class="lbl"><span class="conn-dot" id="conn-dot"></span>pc health</div>
+    <div class="stat-row">
+      <span class="stat-name">cpu</span>
+      <div class="stat-bg"><div class="stat-fill" id="stat-cpu" style="background:-webkit-linear-gradient(left,#a78bfa,#c4b5fd);background:linear-gradient(to right,#a78bfa,#c4b5fd);width:0%"></div></div>
+      <span class="stat-val" id="val-cpu" style="color:#c4b5fd">0%</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-name">ram</span>
+      <div class="stat-bg"><div class="stat-fill" id="stat-ram" style="background:-webkit-linear-gradient(left,#f9a8d4,#fca5a5);background:linear-gradient(to right,#f9a8d4,#fca5a5);width:0%"></div></div>
+      <span class="stat-val" id="val-ram" style="color:#f9a8d4">0%</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-name">gpu</span>
+      <div class="stat-bg"><div class="stat-fill" id="stat-gpu" style="background:-webkit-linear-gradient(left,#6ee7b7,#93c5fd);background:linear-gradient(to right,#6ee7b7,#93c5fd);width:0%"></div></div>
+      <span class="stat-val" id="val-gpu" style="color:#6ee7b7">0%</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-name">tmp</span>
+      <div class="stat-bg"><div class="stat-fill" id="stat-temp" style="background:-webkit-linear-gradient(left,#fcd34d,#fb923c);background:linear-gradient(to right,#fcd34d,#fb923c);width:0%"></div></div>
+      <span class="stat-val" id="val-temp" style="color:#fcd34d">0°</span>
+    </div>
+  </div>
+
+  <!-- CATS — ASCII animated -->
+  <div class="card cell-cats" style="display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column">
+    <div class="lbl">little friends 🐱</div>
+    <div id="ascii-cat" style="-webkit-box-flex:1;-webkit-flex:1;flex:1;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center">
+      <pre id="cat-pre" style="font-family:'Courier Prime',monospace;font-size:17px;line-height:1.5;color:#f9a8d4;text-align:center;white-space:pre;-webkit-user-select:none;user-select:none"></pre>
+      <div id="cat-name" style="font-size:11px;color:rgba(249,168,212,0.4);font-family:'Lora',serif;font-style:italic;margin-top:6px"></div>
+    </div>
+  </div>
+
+  <!-- TIMER (POMODORO) -->
+  <div class="card cell-timer">
+    <div class="lbl">focus</div>
+    <div class="pom-wrap">
+      <div class="pom-ring"><div class="pom-num" id="pom-display">25:00</div></div>
+      <div class="pom-sub" id="pom-state">ready</div>
+      <button class="pom-btn" id="pom-btn" onclick="togglePomodoro()">start</button>
+    </div>
+  </div>
+
+  <!-- WEEK AHEAD LIVE -->
+  <div class="card cell-week">
+    <div class="lbl">week ahead · live</div>
+    <div id="forecast-container"><div style="font-size:10px;color:rgba(180,160,230,0.3);font-style:italic">loading...</div></div>
+  </div>
+
+  <!-- PLAYBAR — spans cols 1+2 -->
+  <div class="card cell-play">
+    <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 6% 50%,rgba(167,139,250,0.1),transparent 55%);pointer-events:none;border-radius:16px"></div>
+    <div class="lbl">now playing · spotify</div>
+    <div class="music-inner">
+      <div class="album-wrap">
+        <img id="album-art" src="" class="album-img"/>
+      </div>
+      <div class="track-info">
+        <div class="track-name" id="track-name">connecting...</div>
+        <div class="track-artist" id="track-artist">waiting for spotify</div>
+        <div class="progress-bg"><div class="progress-fill" id="progress-fill"></div></div>
+        <div id="progress-time" style="font-size:8px;color:rgba(180,160,230,0.35);font-family:'Courier Prime',monospace;text-align:right;margin-top:2px">0:00 / 0:00</div>
+        <div class="controls">
+          <button class="ctrl-btn" onclick="spotifyControl('prev')">⏮</button>
+          <button class="ctrl-btn active" id="play-btn" onclick="spotifyControl('playpause')">⏸</button>
+          <button class="ctrl-btn" onclick="spotifyControl('next')">⏭</button>
+          <button class="ctrl-btn" onclick="spotifyControl('volumedown')">🔉</button>
+          <button class="ctrl-btn" onclick="spotifyControl('volumeup')">🔊</button>
+          <span class="music-status" id="music-status">live</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASCII VISUALIZER -->
+  <div class="card cell-viz" style="display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;background:rgba(10,6,22,0.95)">
+    <div class="lbl">vibe check</div>
+    <div id="ascii-viz" style="-webkit-box-flex:1;-webkit-flex:1;flex:1;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;-webkit-box-align:center;-webkit-align-items:center;align-items:center;gap:2px;overflow:hidden"></div>
+    <div class="mood-text" id="mood-text" style="margin-top:6px">"it's raining, and that's okay."</div>
+  </div>
+
+</div>
+
+<script>
+var SERVER = "http://192.168.1.8:3000";
+
+// ── RAIN ──────────────────────────────────────────────────────
+var rainEl = document.getElementById("rain");
+for(var i=0;i<18;i++){
+  var d=document.createElement("div"); d.className="drop";
+  d.style.left=Math.random()*100+"%";
+  d.style.height=28+Math.random()*55+"px";
+  d.style.opacity=(0.07+Math.random()*0.14).toFixed(2);
+  d.style.WebkitAnimationName="fall"; d.style.animationName="fall";
+  d.style.WebkitAnimationDuration=1.3+Math.random()*2.4+"s"; d.style.animationDuration=d.style.WebkitAnimationDuration;
+  d.style.WebkitAnimationDelay=-Math.random()*4+"s"; d.style.animationDelay=d.style.WebkitAnimationDelay;
+  d.style.WebkitAnimationTimingFunction="linear"; d.style.animationTimingFunction="linear";
+  d.style.WebkitAnimationIterationCount="infinite"; d.style.animationIterationCount="infinite";
+  rainEl.appendChild(d);
+}
+
+// ── CLOCK ─────────────────────────────────────────────────────
+var DAYS=["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
+var MONTHS=["january","february","march","april","may","june","july","august","september","october","november","december"];
+function pad2(n){ var s=String(n); return s.length<2?"0"+s:s; }
+function updateClock(){
+  var n=new Date();
+  document.getElementById("clock-display").textContent=pad2(n.getHours())+":"+pad2(n.getMinutes());
+  document.getElementById("clock-secs").textContent=":"+pad2(n.getSeconds());
+  document.getElementById("clock-date").textContent=DAYS[n.getDay()]+", "+n.getDate()+" "+MONTHS[n.getMonth()];
+}
+updateClock(); setInterval(updateClock,1000);
+
+// ── ASCII CATS ────────────────────────────────────────────────
+// ── ASCII CATS ────────────────────────────────────────────────
+var catPre  = document.getElementById("cat-pre");
+var catName = document.getElementById("cat-name");
+
+// each cat is an array of frames, each frame is a string
+var ASCII_CATS = [
+
+  // 1. NYAN CAT — the legend
+  { name: "nyan cat ★", color: "#f9a8d4", speed: 180, frames: [
+    "+☆*+☆*+☆*+☆\n,---,\n|^_^|━━━━\n'---'★彡  \n*+☆*+☆*+☆+",
+    "*+☆*+☆*+☆*\n ,---,     \n |^_^|━━━━ \n '---' ★彡 \n+☆*+☆*+☆*+",
+    "☆*+☆*+☆*+☆\n  ,---,    \n  |^_^|━━━━\n  '---'★彡 \n*+☆*+☆*+☆*",
+    "+☆*+☆*+☆*+\n ,---,     \n |^_^|━━━━ \n '---' ★彡 \n☆*+☆*+☆*+☆",
+    "*+☆*+☆*+☆*\n,---,      \n|^_^|━━━━  \n'---'★彡   \n+☆*+☆*+☆*+"
+  ]},
+
+  // 2. BUSINESS CAT — deal with it
+  { name: "business cat", color: "#c4b5fd", speed: 700, frames: [
+    "  /\\_/\\  \n ( o.o ) \n  > ^ <  \n [suit]  \n\"deal w it\"",
+    "  /\\_/\\  \n ( -.- ) \n  > ^ <  \n [suit]  \n\"deal w it\"",
+    "  /\\_/\\  \n ( o.o ) \n  > ^ <  \n [suit]  \n\" ...    \"",
+    "  /\\_/\\  \n ( >.< ) \n  > ^ <  \n [suit]  \n\"DEAL WIT\""
+  ]},
+
+  // 3. CEILING CAT — watching you
+  { name: "ceiling cat", color: "#fcd34d", speed: 600, frames: [
+    "___________\n|  hole   |\n| /\\_/\\  |\n| (o . o) |\n|  > ^ <  |",
+    "___________\n|  hole   |\n| /\\_/\\  |\n| (O . O) |\n|  > ^ <  |",
+    "___________\n|  hole   |\n| /\\_/\\  |\n| (o . o) |\n|  > ^ <  |",
+    "___________\n|  hole   |\n| /\\_/\\  |\n| (-w-)   |\n|  > ^ <  |"
+  ]},
+
+  // 4. GRUMPY CAT
+  { name: "grumpy cat", color: "#93c5fd", speed: 650, frames: [
+    "  /\\_/\\  \n ( -.-)  \n  > v <  \n \"NO.\"   ",
+    "  /\\_/\\  \n ( -,-)  \n  > v <  \n \"NO.\"   ",
+    "  /\\_/\\  \n ( -.-)  \n  > v <  \n\" still \"\n\"  NO.  \"",
+    "  /\\_/\\  \n ( -.-)  \n  > v <  \n \"NO.\"   "
+  ]},
+
+  // 5. KEYBOARD CAT — playing the tune
+  { name: "keyboard cat", color: "#6ee7b7", speed: 250, frames: [
+    "  /\\_/\\   \n ( ^.^ )  \n  |   |   \n[__|___]  \n  ♪       ",
+    "  /\\_/\\   \n ( ^.^ )  \n  |   |   \n[___|__]  \n    ♪     ",
+    "  /\\_/\\   \n ( ^ω^ )  \n  |   |   \n[__|___]  \n  ♪  ♩    ",
+    "  /\\_/\\   \n ( ^.^ )  \n  |   |   \n[___|__]  \n    ♪ ♩   ",
+    "  /\\_/\\   \n ( ^ω^ )  \n  |   |   \n[__|___]  \n ♪ ♩  ♪   "
+  ]},
+
+  // 6. LONGCAT — he is long
+  { name: "longcat", color: "#fca5a5", speed: 400, frames: [
+    " /\\_/\\ \n(o . o)\n > ^ < \n  | |  \n  | |  \n  | |  \nvery long",
+    " /\\_/\\ \n(o . o)\n > ^ < \n  | |  \n  | |  \n  | |  \nso long! ",
+    " /\\_/\\ \n(-w- ) \n > ^ < \n  | |  \n  | |  \n  | |  \nvery long",
+    " /\\_/\\ \n(o . o)\n > ^ < \n  | |  \n  | |  \n  | |  \n he long  "
+  ]},
+
+  // 7. MONORAIL CAT
+  { name: "monorail cat", color: "#fb923c", speed: 200, frames: [
+    "        /\\_/\\ \n~~~~~( >^.^< )~~~~~\n  monorail cat! ",
+    "       /\\_/\\  \n~~~~( >^.^< )~~~~~~\n  monorail cat! ",
+    "      /\\_/\\   \n~~~( >^.^< )~~~~~~~\n  monorail cat! ",
+    "     /\\_/\\    \n~~( >^.^< )~~~~~~~~\n  monorail cat! ",
+    "    /\\_/\\     \n~( >^.^< )~~~~~~~~~\n  monorail cat! ",
+    "   /\\_/\\      \n( >^.^< )~~~~~~~~~~\n  monorail cat! "
+  ]},
+
+  // 8. POP CAT — open/close mouth
+  { name: "pop cat", color: "#a78bfa", speed: 200, frames: [
+    "  /\\_/\\  \n ( o.o ) \n  >___<  \n  closed ",
+    "  /\\_/\\  \n ( o.o ) \n  > O <  \n   POP! ",
+    "  /\\_/\\  \n ( o.o ) \n  >___<  \n  closed ",
+    "  /\\_/\\  \n ( o.o ) \n  > O <  \n   POP! ",
+    "  /\\_/\\  \n ( o.o ) \n  >___<  \n  closed ",
+    "  /\\_/\\  \n ( ^.^ ) \n  > O <  \n  POP!! "
+  ]},
+
+  // 9. SMUDGE CAT — the confused one at the table
+  { name: "smudge cat", color: "#f9a8d4", speed: 600, frames: [
+    " _______  \n| TABLE | \n|  /\\_/\\|\n| (o_O )|  \n|_______|  \n\"   ?   \"",
+    " _______  \n| TABLE | \n|  /\\_/\\|\n| (O_o )|  \n|_______|  \n\"  ??   \"",
+    " _______  \n| TABLE | \n|  /\\_/\\|\n| (o_O )|  \n|_______|  \n\" wut?  \"",
+    " _______  \n| TABLE | \n|  /\\_/\\|\n| (>_< )|  \n|_______|  \n\"  ???  \""
+  ]},
+
+  // 10. ORIGINAL 9 — sitting lofi
+  { name: "lofi kitty", color: "#f9a8d4", speed: 700, frames: [
+    "  /\\_/\\ \n ( o.o )\n  > ^ <\n (_____)  ",
+    "  /\\_/\\ \n ( -.- )\n  > ^ <\n (_____)  ",
+    "  /\\_/\\ \n ( o.o )\n  > ^ <\n (_____)  ",
+    "  /\\_/\\ \n ( ^.^ )\n  > ^ <\n (_____)  "
+  ]},
+
+  // 11. dancing
+  { name: "dance mode", color: "#c4b5fd", speed: 300, frames: [
+    "  /\\_/\\ \n ( ^ω^ )\n  /|  |\\\n  \" \"  ",
+    " \\( ^ω^ )\n  /|  |\\\n  \" \"    ",
+    "  /\\_/\\ \n ( ^ω^ )/\n  |\\   \n  \" \"   ",
+    "  /\\_/\\ \n\\( ^ω^ )\n    /|\n  \" \"   "
+  ]},
+
+  // 12. sleepy
+  { name: "nap time", color: "#6ee7b7", speed: 900, frames: [
+    "  /\\_/\\ \n ( -.- )\n  > ^ <\n  zzz...",
+    "  /\\_/\\ \n ( _._ )\n  > ^ <\n   zzz..",
+    "  /\\_/\\ \n ( -.- )\n  > ^ <\n    zzz.",
+    "  /\\_/\\ \n ( -.- )\n  > ^ <\n  z z z "
+  ]},
+
+  // 13. typing
+  { name: "on the grind", color: "#a78bfa", speed: 200, frames: [
+    "  /\\_/\\ \n ( >_< )\n  | |   \n [___|__]",
+    "  /\\_/\\ \n ( >_< )\n  | |   \n [__|___]",
+    "  /\\_/\\ \n ( -_- )\n  | |   \n [___|__]",
+    "  /\\_/\\ \n ( >_< )\n  | |   \n [__|___]"
+  ]},
+
+  // 14. heart eyes
+  { name: "in love", color: "#fca5a5", speed: 500, frames: [
+    "  /\\_/\\ \n ( ♥.♥ )\n  > ^ <\n  ~♡~   ",
+    "  /\\_/\\ \n ( ♥ω♥ )\n  > ^ <\n  ~♡~   ",
+    "  /\\_/\\ \n ( ♥.♥ )\n  > ^ <\n  ~♡♡~  ",
+    "  /\\_/\\ \n ( ^.^ )\n  > ^ <\n  ~♡~   "
+  ]}
+];
+
+var curCat    = 0;
+var curFrame  = 0;
+var frameTimer = null;
+var catTimer   = null;
+
+function showCatFrame(){
+  var cat = ASCII_CATS[curCat];
+  catPre.textContent  = cat.frames[curFrame];
+  catPre.style.color  = cat.color;
+  catName.textContent = cat.name;
+  curFrame = (curFrame + 1) % cat.frames.length;
+}
+
+function startCat(){
+  if(frameTimer) clearInterval(frameTimer);
+  curFrame = 0;
+  showCatFrame();
+  var spd = ASCII_CATS[curCat].speed || 600;
+  frameTimer = setInterval(showCatFrame, spd);
+}
+
+function nextCat(){
+  curCat = (curCat + 1) % ASCII_CATS.length;
+  startCat();
+}
+
+startCat();
+catTimer = setInterval(nextCat, 8000);
+
+// ── ASCII VISUALIZER — per-column spans, colorful ────────────
+var asciiPlaying = false;
+var asciiInterval = null;
+var asciiEl = document.getElementById("ascii-viz");
+
+var COLS = 18;
+var ROWS = 6;
+var heights    = [];
+var targets    = [];
+var velocities = [];
+for(var ac=0; ac<COLS; ac++){ heights.push(0); targets.push(0); velocities.push(0); }
+
+var VIZ_COLORS = [
+  "#a78bfa","#b99dfc","#c4b5fd",
+  "#f9a8d4","#fbb8de","#fca5a5",
+  "#6ee7b7","#86efca","#93c5fd",
+  "#fcd34d","#fde68a","#fb923c",
+  "#a78bfa","#f9a8d4","#6ee7b7",
+  "#c4b5fd","#fcd34d","#fca5a5"
+];
+
+var BLOCK = ["·","▁","▂","▃","▄","▅","▆","▇","█"];
+
+// build one span per column — each gets its own colour
+// we update one string per column per tick (COLS writes not ROWS*COLS)
+var vizContainer = document.createElement("div");
+vizContainer.style.display       = "-webkit-box";
+vizContainer.style.WebkitBoxAlign = "flex-end";
+vizContainer.style.display        = "-webkit-flex";
+vizContainer.style.display        = "flex";
+vizContainer.style.WebkitAlignItems = "flex-end";
+vizContainer.style.alignItems     = "flex-end";
+vizContainer.style.gap            = "3px";
+vizContainer.style.width          = "100%";
+vizContainer.style.WebkitBoxFlex  = "1";
+vizContainer.style.WebkitFlex     = "1";
+vizContainer.style.flex           = "1";
+asciiEl.appendChild(vizContainer);
+
+var colSpans = [];
+for(var ci=0; ci<COLS; ci++){
+  var sp = document.createElement("pre");
+  sp.style.fontFamily   = "'Courier Prime',monospace";
+  sp.style.fontSize     = "12px";
+  sp.style.lineHeight   = "1.3";
+  sp.style.color        = VIZ_COLORS[ci];
+  sp.style.margin       = "0";
+  sp.style.padding      = "0";
+  sp.style.WebkitFlex   = "1";
+  sp.style.flex         = "1";
+  sp.style.textAlign    = "center";
+  sp.style.WebkitUserSelect = "none";
+  sp.style.userSelect   = "none";
+  sp.style.textShadow   = "0 0 8px "+VIZ_COLORS[ci];
+  sp.textContent        = "·\n·\n·\n·\n·\n·";
+  vizContainer.appendChild(sp);
+  colSpans.push(sp);
+}
+
+function renderAscii(){
+  for(var ac=0; ac<COLS; ac++){
+    var h    = heights[ac];
+    var full = Math.floor(h);
+    var frac = h - full;
+    var col  = "";
+    for(var ar=0; ar<ROWS; ar++){
+      var rowFromBottom = ROWS - 1 - ar;
+      if(rowFromBottom < full){
+        col += "█\n";
+      } else if(rowFromBottom === full){
+        col += (BLOCK[Math.round(frac*8)]||"·") + "\n";
+      } else {
+        col += "·\n";
+      }
+    }
+    colSpans[ac].textContent = col;
+  }
+}
+
+function tickAscii(){
+  for(var ac=0; ac<COLS; ac++){
+    if(asciiPlaying){
+      if(Math.random() < 0.12) targets[ac] = Math.random() * ROWS;
+      velocities[ac] += (targets[ac] - heights[ac]) * 0.3;
+      velocities[ac] *= 0.6;
+      heights[ac] = Math.max(0, Math.min(ROWS, heights[ac] + velocities[ac]));
+    } else {
+      heights[ac] *= 0.78;
+      if(heights[ac] < 0.05) heights[ac] = 0;
+    }
+  }
+  renderAscii();
+}
+
+asciiInterval = setInterval(tickAscii, 120);
+
+function setVizPlaying(on){ asciiPlaying = on; }
+
+// ── MOODS ─────────────────────────────────────────────────────
+var moods=['"it\'s raining, and that\'s okay."','"stay soft, keep going."','"slow down. you\'re doing fine."','"the world is quieter tonight."','"this moment is enough."','"breathe. you made it today."'];
+var moodIdx=0;
+setInterval(function(){ moodIdx=(moodIdx+1)%moods.length; document.getElementById("mood-text").textContent=moods[moodIdx]; },12000);
+
+// ── POMODORO ──────────────────────────────────────────────────
+var pomSeconds=25*60,pomRunning=false,pomInterval=null;
+function togglePomodoro(){
+  pomRunning=!pomRunning;
+  var btn=document.getElementById("pom-btn"),state=document.getElementById("pom-state");
+  if(pomRunning){
+    btn.textContent="pause"; state.textContent="focusing";
+    pomInterval=setInterval(function(){
+      if(pomSeconds>0){ pomSeconds--; document.getElementById("pom-display").textContent=pad2(Math.floor(pomSeconds/60))+":"+pad2(pomSeconds%60); }
+      else { clearInterval(pomInterval);pomRunning=false;btn.textContent="restart";state.textContent="break ☕";pomSeconds=25*60; }
+    },1000);
+  } else { clearInterval(pomInterval);btn.textContent="resume";state.textContent="paused"; }
+}
+
+// ── SPOTIFY + SMOOTH PROGRESS BAR ────────────────────────────
+var lastTitle="", lastArtist="", lastArt="";
+var progInterval=null;
+var progStart=0;
+var progDuration=0;
+var progPaused=true;
+
+function startProgressTimer(){
+  if(progInterval) clearInterval(progInterval);
+  if(progPaused||progDuration<=0) return;
+  progInterval=setInterval(function(){
+    var elapsed=Date.now()-progStart;
+    var pct=Math.min((elapsed/progDuration)*100,100);
+    document.getElementById("progress-fill").style.width=pct+"%";
+    var eS=Math.floor(elapsed/1000);
+    var tS=Math.floor(progDuration/1000);
+    var eM=Math.floor(eS/60); eS=eS%60;
+    var tM=Math.floor(tS/60); tS=tS%60;
+    var tel=document.getElementById("progress-time");
+    if(tel) tel.textContent=eM+":"+(eS<10?"0":"")+eS+" / "+tM+":"+(tS<10?"0":"")+tS;
+    if(pct>=100) clearInterval(progInterval);
+  },500);
+}
+
+function fetchNowPlaying(){
+  var xhr=new XMLHttpRequest(); xhr.open("GET",SERVER+"/now-playing?t="+Date.now(),true); xhr.timeout=4000;
+  xhr.onreadystatechange=function(){
+    if(xhr.readyState!==4) return;
+    var dot=document.getElementById("conn-dot");
+    if(xhr.status===200){
+      dot.className="conn-dot";
+      try{
+        var data=JSON.parse(xhr.responseText);
+        var st=document.getElementById("music-status");
+        if(data.title)    lastTitle=data.title;
+        if(data.artist)   lastArtist=data.artist;
+        if(data.albumArt) lastArt=data.albumArt;
+        if(lastTitle)  document.getElementById("track-name").textContent=lastTitle;
+        if(lastArtist) document.getElementById("track-artist").textContent=lastArtist;
+        if(lastArt){ var art=document.getElementById("album-art"); if(art.getAttribute("src")!==lastArt) art.src=lastArt; }
+        if(data.duration&&data.duration>0)       progDuration=data.duration;
+        if(data.scrobbledAt&&data.scrobbledAt>0) progStart=data.scrobbledAt;
+        if(data.isPlaying){
+          document.getElementById("play-btn").textContent="⏸";
+          st.textContent="live"; st.className="music-status live";
+          progPaused=false;
+          if(progDuration>0) startProgressTimer();
+          setVizPlaying(true);
+        } else {
+          document.getElementById("play-btn").textContent="▶";
+          st.textContent="paused"; st.className="music-status";
+          progPaused=true;
+          if(progInterval){ clearInterval(progInterval); progInterval=null; }
+          setVizPlaying(false);
+          if(!lastTitle){ document.getElementById("track-name").textContent="nothing playing"; document.getElementById("track-artist").textContent="open spotify on your pc"; }
+        }
+      } catch(e){}
+    } else {
+      dot.className="conn-dot offline";
+      document.getElementById("track-name").textContent="server offline";
+      document.getElementById("track-artist").textContent="check pc server";
+      setVizPlaying(false);
+    }
+  };
+  xhr.onerror=function(){ document.getElementById("conn-dot").className="conn-dot offline"; };
+  xhr.send();
+}
+function spotifyControl(a){ var xhr=new XMLHttpRequest(); xhr.open("POST",SERVER+"/control/"+a,true); xhr.send(); setTimeout(fetchNowPlaying,800); }
+fetchNowPlaying(); setInterval(fetchNowPlaying,3000);
+
+// ── PC STATS ──────────────────────────────────────────────────
+function fetchStats(){
+  var xhr=new XMLHttpRequest(); xhr.open("GET",SERVER+"/pc-stats?t="+Date.now(),true); xhr.timeout=4000;
+  xhr.onreadystatechange=function(){
+    if(xhr.readyState!==4||xhr.status!==200) return;
+    try{
+      var d=JSON.parse(xhr.responseText);
+      document.getElementById("stat-cpu").style.width=d.cpu+"%"; document.getElementById("val-cpu").textContent=d.cpu+"%";
+      document.getElementById("stat-ram").style.width=d.ram+"%"; document.getElementById("val-ram").textContent=d.ram+"%";
+      document.getElementById("stat-gpu").style.width=d.gpu+"%"; document.getElementById("val-gpu").textContent=d.gpu+"%";
+      document.getElementById("stat-temp").style.width=Math.min(d.temp,100)+"%"; document.getElementById("val-temp").textContent=d.temp+"°";
+    } catch(e){}
+  };
+  xhr.send();
+}
+fetchStats(); setInterval(fetchStats,5000);
+
+// ── WEATHER ───────────────────────────────────────────────────
+function fetchWeather(){
+  var xhr=new XMLHttpRequest(); xhr.open("GET",SERVER+"/weather?t="+Date.now(),true); xhr.timeout=8000;
+  xhr.onreadystatechange=function(){
+    if(xhr.readyState!==4||xhr.status!==200) return;
+    try{
+      var d=JSON.parse(xhr.responseText);
+      document.getElementById("w-icon").textContent=d.icon||"🌡";
+      document.getElementById("w-temp").textContent=d.temp+"°";
+      document.getElementById("w-desc").textContent=d.description;
+      document.getElementById("w-humidity").textContent=d.humidity+"% humid";
+      document.getElementById("w-wind").textContent=d.windspeed+" km/h";
+    } catch(e){}
+  };
+  xhr.send();
+}
+fetchWeather(); setInterval(fetchWeather,600000);
+
+// ── FORECAST ──────────────────────────────────────────────────
+function fetchForecast(){
+  var xhr=new XMLHttpRequest(); xhr.open("GET",SERVER+"/forecast?t="+Date.now(),true); xhr.timeout=8000;
+  xhr.onreadystatechange=function(){
+    if(xhr.readyState!==4||xhr.status!==200) return;
+    try{
+      var days=JSON.parse(xhr.responseText);
+      var fcEl=document.getElementById("forecast-container");
+      if(!days||!days.length) return;
+      fcEl.innerHTML="";
+      for(var fi=0;fi<days.length;fi++){
+        var day=days[fi]; var pct=Math.round(((day.hi-15)/(44-15))*100);
+        var row=document.createElement("div"); row.className="fc-row";
+        row.innerHTML='<span class="fc-day">'+day.day+'</span><span class="fc-icon">'+day.icon+'</span><div class="fc-bar-bg"><div class="fc-bar-fill" style="width:'+pct+'%"></div></div><span class="fc-temps">'+day.lo+'–'+day.hi+'°</span>';
+        fcEl.appendChild(row);
+      }
+    } catch(e){}
+  };
+  xhr.send();
+}
+fetchForecast(); setInterval(fetchForecast,1800000);
+</script>
+</body>
+</html>
