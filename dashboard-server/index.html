@@ -53,7 +53,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:"Josefin Sans",sans
 .cell-cats   { grid-column:3; grid-row:1 / span 2; } /* cats spans rows 1+2 */
 .cell-timer  { grid-column:1; grid-row:1; }          /* timer col 1 row 1 */
 .cell-week   { grid-column:1; grid-row:2; }          /* forecast col 1 row 2 */
-.cell-play   { grid-column:1 / span 2; grid-row:3; } /* playbar spans cols 1+2 */
+.cell-play   { grid-column:1 / span 2; grid-row:3; padding:20px 28px; } /* playbar spans cols 1+2 */
 .cell-viz    { grid-column:3; grid-row:3; }
 
 /* ════ TIME + TEMP ════ */
@@ -113,7 +113,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:"Josefin Sans",sans
 .track-name{font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ede8f5;font-family:"Josefin Sans",sans-serif;line-height:1.2;-webkit-flex:1;flex:1;min-width:0}
 .track-artist{font-size:13px;color:rgba(210,200,235,0.48);font-style:italic;font-family:"Lora",serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .progress-bg{height:5px;background:rgba(255,255,255,0.08);border-radius:5px;width:100%}
-.progress-fill{height:5px;border-radius:5px;background:-webkit-linear-gradient(left,#a78bfa,#f9a8d4,#fcd34d);background:linear-gradient(to right,#a78bfa,#f9a8d4,#fcd34d);width:0%;-webkit-transition:width 0.5s linear;transition:width 0.5s linear}
+.progress-fill{height:5px;border-radius:5px;background:-webkit-linear-gradient(left,#a78bfa,#f9a8d4,#fcd34d);background:linear-gradient(to right,#a78bfa,#f9a8d4,#fcd34d);width:0%;-webkit-transition:width 0.28s linear;transition:width 0.28s linear}
 .controls{display:-webkit-box;display:-webkit-flex;display:flex;gap:4px;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center}
 .vol-row{display:-webkit-box;display:-webkit-flex;display:flex;gap:2px;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;margin-top:2px}
 .ctrl-btn{background:none;border:none;cursor:pointer;font-size:24px;color:rgba(210,200,235,0.4);padding:8px 12px;line-height:1;min-width:44px;min-height:44px;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
@@ -676,22 +676,33 @@ var progStart=0;
 var progDuration=0;
 var progPaused=true;
 
+function fmtTime(ms){
+  var s=Math.max(0,Math.floor(ms/1000));
+  var m=Math.floor(s/60); s=s%60;
+  return m+":"+(s<10?"0":"")+s;
+}
+
 function startProgressTimer(){
   if(progInterval) clearInterval(progInterval);
-  if(progPaused||progDuration<=0) return;
+  if(progPaused) return;
   progInterval=setInterval(function(){
     var elapsed=Date.now()-progStart;
-    var pct=Math.min((elapsed/progDuration)*100,100);
-    document.getElementById("progress-fill").style.width=pct+"%";
-    var eS=Math.floor(elapsed/1000);
-    var tS=Math.floor(progDuration/1000);
-    var eM=Math.floor(eS/60); eS=eS%60;
-    var tM=Math.floor(tS/60); tS=tS%60;
+    var fill=document.getElementById("progress-fill");
     var tel=document.getElementById("progress-time");
-    if(tel) tel.textContent=eM+":"+(eS<10?"0":"")+eS+" / "+tM+":"+(tS<10?"0":"")+tS;
-    if(pct>=100) clearInterval(progInterval);
-  },500);
+    if(progDuration>0){
+      var pct=Math.min((elapsed/progDuration)*100,100);
+      if(fill) fill.style.width=pct+"%";
+      if(tel)  tel.textContent=fmtTime(elapsed)+" / "+fmtTime(progDuration);
+      if(pct>=100){ clearInterval(progInterval); progInterval=null; }
+    } else {
+      /* duration unknown — show elapsed only, fill bar with gentle pulse */
+      if(fill) fill.style.width="0%";
+      if(tel)  tel.textContent=fmtTime(elapsed)+" / --:--";
+    }
+  },250);
 }
+
+var lastSeenTitle="";
 
 function fetchNowPlaying(){
   var xhr=new XMLHttpRequest(); xhr.open("GET",SERVER+"/now-playing?t="+Date.now(),true); xhr.timeout=4000;
@@ -709,13 +720,22 @@ function fetchNowPlaying(){
         if(lastTitle)  document.getElementById("track-name").textContent=lastTitle;
         if(lastArtist) document.getElementById("track-artist").textContent=lastArtist;
         if(lastArt){ var art=document.getElementById("album-art"); if(art.getAttribute("src")!==lastArt) art.src=lastArt; }
-        if(data.duration&&data.duration>0)       progDuration=data.duration;
-        if(data.scrobbledAt&&data.scrobbledAt>0) progStart=data.scrobbledAt;
+
+        /* only resync timer when track changes or timer isn't running */
+        var trackChanged=(data.title&&data.title!==lastSeenTitle);
+        if(trackChanged){
+          lastSeenTitle=data.title||"";
+          progDuration = (data.duration&&data.duration>0) ? data.duration : 0;
+          progStart    = (data.scrobbledAt&&data.scrobbledAt>0) ? data.scrobbledAt : Date.now();
+        }
+
         if(data.isPlaying){
           document.getElementById("play-btn").textContent="⏸";
           st.textContent="live"; st.className="music-status live";
+          var waspaused=progPaused;
           progPaused=false;
-          if(progDuration>0) startProgressTimer();
+          /* start/restart timer only on track change or if we just resumed */
+          if(trackChanged||waspaused||!progInterval) startProgressTimer();
           setVizPlaying(true);
         } else {
           document.getElementById("play-btn").textContent="▶";
