@@ -59,29 +59,38 @@ module.exports = function startServer(staticDir, settingsPath, onReady) {
   app.get('/now-playing', function(req, res) { res.json(currentTrack); });
 
   // ── SPOTIFY CONTROLS ────────────────────────────────────────
-  // Uses Windows media-key virtual codes (keybd_event) via
-  // PowerShell -EncodedCommand — works even when Spotify is
-  // minimised or sitting in the system tray.
+  // Persistent PowerShell process — spawned once, type compiled once,
+  // each button press just writes one line → ~instant response.
   var VK = { playpause: 0xB3, next: 0xB0, prev: 0xB1, volumeup: 0xAF, volumedown: 0xAE };
+  var psProc = null;
+
+  function ensurePS() {
+    if (psProc && !psProc.killed) return;
+    var spawn = require('child_process').spawn;
+    psProc = spawn('powershell', ['-NoProfile', '-NonInteractive', '-Command', '-'], {
+      stdio: ['pipe', 'ignore', 'ignore']
+    });
+    psProc.on('exit', function() { psProc = null; });
+    // Compile the type once — backtick-quote escapes " inside PS double-string
+    psProc.stdin.write(
+      'Add-Type -TypeDefinition "using System; using System.Runtime.InteropServices; ' +
+      'public class MK { [DllImport(`"user32.dll`")] public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo); ' +
+      'public static void Press(byte vk) { keybd_event(vk,0,0,0); keybd_event(vk,0,2,0); } }"\r\n'
+    );
+  }
+
+  // Warm up immediately so first keypress is instant
+  ensurePS();
 
   function sendMediaKey(vkCode) {
-    var script = [
-      'if (-not ([System.Management.Automation.PSTypeName]\'MK\').Type) {',
-      '  Add-Type -TypeDefinition @\'',
-      'using System;',
-      'using System.Runtime.InteropServices;',
-      'public class MK {',
-      '  [DllImport("user32.dll")]',
-      '  public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);',
-      '  public static void Press(byte vk) { keybd_event(vk,0,0,0); keybd_event(vk,0,2,0); }',
-      '}',
-      '\'@',
-      '}',
-      '[MK]::Press(' + vkCode + ')'
-    ].join('\r\n');
-    // -EncodedCommand avoids all shell-escaping headaches
-    var encoded = Buffer.from(script, 'utf16le').toString('base64');
-    exec('powershell -NoProfile -NonInteractive -EncodedCommand ' + encoded);
+    ensurePS();
+    try {
+      psProc.stdin.write('[MK]::Press(' + vkCode + ')\r\n');
+    } catch(e) {
+      psProc = null;
+      ensurePS();
+      psProc.stdin.write('[MK]::Press(' + vkCode + ')\r\n');
+    }
   }
 
   app.post('/control/:action', function(req, res) {

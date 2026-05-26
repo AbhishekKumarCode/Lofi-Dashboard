@@ -56,7 +56,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#080610;color:#ede8f
 .log-clear:hover{color:rgba(180,160,230,0.65);background:rgba(160,130,255,0.1)}
 
 /* ── theme picker ── */
-#theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#theme-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
 .theme-swatch{border-radius:12px;padding:11px 10px;cursor:pointer;border:2px solid rgba(255,255,255,0.06);transition:border-color .18s,transform .12s,box-shadow .18s;position:relative;overflow:hidden}
 .theme-swatch::before{content:'';position:absolute;inset:0;opacity:0;background:rgba(255,255,255,0.06);transition:opacity .15s}
 .theme-swatch:hover::before{opacity:1}
@@ -129,7 +129,7 @@ input:focus{border-color:rgba(167,139,250,0.5)}
     <!-- THEMES -->
     <div class="card">
       <div class="card-title">theme</div>
-      <div id="theme-grid">
+      <div id="theme-grid" style="grid-template-columns:repeat(4,1fr)">
         <div class="theme-swatch active" id="sw-lofi" data-theme="lofi"
           style="background:linear-gradient(145deg,rgba(167,139,250,0.45) 0%,rgba(249,168,212,0.25) 45%,rgba(8,6,16,0.95) 100%)"
           onclick="setTheme('lofi')">
@@ -189,6 +189,66 @@ input:focus{border-color:rgba(167,139,250,0.5)}
             <div class="sw-dot" style="background:#737373;color:#737373"></div>
           </div>
           <div class="sw-name">mono</div>
+        </div>
+        <div class="theme-swatch" id="sw-midnight" data-theme="midnight"
+          style="background:linear-gradient(145deg,rgba(129,140,248,0.45) 0%,rgba(56,189,248,0.25) 45%,rgba(2,8,24,0.95) 100%)"
+          onclick="setTheme('midnight')">
+          <div class="sw-dots">
+            <div class="sw-dot" style="background:#818cf8;color:#818cf8"></div>
+            <div class="sw-dot" style="background:#38bdf8;color:#38bdf8"></div>
+            <div class="sw-dot" style="background:#34d399;color:#34d399"></div>
+          </div>
+          <div class="sw-name">midnight</div>
+        </div>
+        <div class="theme-swatch" id="sw-sunset" data-theme="sunset"
+          style="background:linear-gradient(145deg,rgba(244,114,182,0.45) 0%,rgba(251,146,60,0.3) 45%,rgba(15,5,20,0.95) 100%)"
+          onclick="setTheme('sunset')">
+          <div class="sw-dots">
+            <div class="sw-dot" style="background:#f472b6;color:#f472b6"></div>
+            <div class="sw-dot" style="background:#fb923c;color:#fb923c"></div>
+            <div class="sw-dot" style="background:#a78bfa;color:#a78bfa"></div>
+          </div>
+          <div class="sw-name">sunset</div>
+        </div>
+        <div class="theme-swatch" id="sw-arctic" data-theme="arctic"
+          style="background:linear-gradient(145deg,rgba(125,211,252,0.45) 0%,rgba(165,243,252,0.25) 45%,rgba(4,14,22,0.95) 100%)"
+          onclick="setTheme('arctic')">
+          <div class="sw-dots">
+            <div class="sw-dot" style="background:#7dd3fc;color:#7dd3fc"></div>
+            <div class="sw-dot" style="background:#a5f3fc;color:#a5f3fc"></div>
+            <div class="sw-dot" style="background:#e0f2fe;color:#e0f2fe"></div>
+          </div>
+          <div class="sw-name">arctic</div>
+        </div>
+        <div class="theme-swatch" id="sw-neon" data-theme="neon"
+          style="background:linear-gradient(145deg,rgba(240,171,252,0.45) 0%,rgba(163,230,53,0.3) 45%,rgba(2,2,8,0.95) 100%)"
+          onclick="setTheme('neon')">
+          <div class="sw-dots">
+            <div class="sw-dot" style="background:#f0abfc;color:#f0abfc"></div>
+            <div class="sw-dot" style="background:#a3e635;color:#a3e635"></div>
+            <div class="sw-dot" style="background:#22d3ee;color:#22d3ee"></div>
+          </div>
+          <div class="sw-name">neon</div>
+        </div>
+        <div class="theme-swatch" id="sw-rose" data-theme="rose"
+          style="background:linear-gradient(145deg,rgba(251,113,133,0.45) 0%,rgba(252,211,77,0.25) 45%,rgba(15,7,9,0.95) 100%)"
+          onclick="setTheme('rose')">
+          <div class="sw-dots">
+            <div class="sw-dot" style="background:#fb7185;color:#fb7185"></div>
+            <div class="sw-dot" style="background:#fcd34d;color:#fcd34d"></div>
+            <div class="sw-dot" style="background:#f9a8d4;color:#f9a8d4"></div>
+          </div>
+          <div class="sw-name">rose</div>
+        </div>
+        <div class="theme-swatch" id="sw-amoled" data-theme="amoled"
+          style="background:linear-gradient(145deg,rgba(167,139,250,0.4) 0%,rgba(110,231,183,0.2) 45%,rgba(0,0,0,1) 100%)"
+          onclick="setTheme('amoled')">
+          <div class="sw-dots">
+            <div class="sw-dot" style="background:#a78bfa;color:#a78bfa"></div>
+            <div class="sw-dot" style="background:#6ee7b7;color:#6ee7b7"></div>
+            <div class="sw-dot" style="background:#fcd34d;color:#fcd34d"></div>
+          </div>
+          <div class="sw-name">amoled</div>
         </div>
       </div>
     </div>

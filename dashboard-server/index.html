@@ -30,9 +30,9 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:"Josefin Sans",sans
   width:100%;height:100%;
   display:grid;
   grid-template-columns: 1fr 1.4fr 1.3fr;
-  grid-template-rows: 1fr 1fr 1.1fr;
-  padding:12px;
-  gap:10px
+  grid-template-rows: 1fr 1fr 1.15fr;
+  padding:8px;
+  gap:8px
 }
 
 /* ════ CARD ════ */
@@ -53,17 +53,17 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:"Josefin Sans",sans
 .cell-cats   { grid-column:3; grid-row:1 / span 2; } /* cats spans rows 1+2 */
 .cell-timer  { grid-column:1; grid-row:1; }          /* timer col 1 row 1 */
 .cell-week   { grid-column:1; grid-row:2; }          /* forecast col 1 row 2 */
-.cell-play   { grid-column:1 / span 2; grid-row:3; padding:20px 28px; } /* playbar spans cols 1+2 */
+.cell-play   { grid-column:1 / span 2; grid-row:3; padding:14px 28px; } /* playbar spans cols 1+2 */
 .cell-viz    { grid-column:3; grid-row:3; }
 
 /* ════ TIME + TEMP ════ */
 .clock-wrap{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;height:100%;text-align:center;gap:6px}
-.clock-time{font-size:72px;font-weight:700;line-height:1;letter-spacing:0.04em;color:#c4b5fd;font-family:"Courier Prime",monospace}
-.clock-secs{font-size:24px;font-weight:400;color:rgba(196,181,253,0.36);font-family:"Courier Prime",monospace}
-.clock-date{font-size:13px;color:rgba(210,200,235,0.4);font-style:italic;font-family:"Lora",serif;margin-bottom:8px}
+.clock-time{font-size:64px;font-weight:700;line-height:1;letter-spacing:0.04em;color:#c4b5fd;font-family:"Courier Prime",monospace}
+.clock-secs{font-size:22px;font-weight:400;color:rgba(196,181,253,0.36);font-family:"Courier Prime",monospace}
+.clock-date{font-size:12px;color:rgba(210,200,235,0.4);font-style:italic;font-family:"Lora",serif;margin-bottom:6px}
 .temp-row{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;gap:10px;margin-top:4px}
 .temp-icon{font-size:32px;line-height:1}
-.temp-val{font-size:42px;font-weight:700;color:#6ee7b7;font-family:"Courier Prime",monospace;line-height:1}
+.temp-val{font-size:36px;font-weight:700;color:#6ee7b7;font-family:"Courier Prime",monospace;line-height:1}
 .temp-desc{font-size:12px;color:rgba(210,200,235,0.38);font-style:italic;font-family:"Lora",serif}
 .temp-pills{display:-webkit-box;display:-webkit-flex;display:flex;gap:7px;margin-top:8px;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center}
 .pill{font-size:9px;padding:3px 11px;border-radius:20px;font-weight:600;font-family:"Courier Prime",monospace}
@@ -108,7 +108,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:"Josefin Sans",sans
 .album-wrap{position:relative;-webkit-flex-shrink:0;flex-shrink:0}
 .album-img{width:110px;height:110px;border-radius:14px;object-fit:cover;display:block;border:2px solid rgba(160,130,255,0.25);background:rgba(167,139,250,0.15);-webkit-box-shadow:0 4px 24px rgba(167,139,250,0.25);box-shadow:0 4px 24px rgba(167,139,250,0.25)}
 .album-paused-overlay{display:none}
-.track-info{min-width:0;max-width:520px;width:100%;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;gap:7px}
+.track-info{min-width:0;max-width:520px;width:100%;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;gap:5px}
 .track-title-row{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;gap:8px;min-width:0}
 .track-name{font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ede8f5;font-family:"Josefin Sans",sans-serif;line-height:1.2;-webkit-flex:1;flex:1;min-width:0}
 .track-artist{font-size:13px;color:rgba(210,200,235,0.48);font-style:italic;font-family:"Lora",serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -266,6 +266,12 @@ var THEMES = {
   sakura:    { bg:'#120508', primary:'#f9a8d4', pcol:'#fbcfe8', secondary:'#fda4af', accent:'#fbbf24', warm:'#6ee7b7', blob1:'#f472b6', blob2:'#fb7185', blob3:'#fbbf24' },
   ember:     { bg:'#0e0600', primary:'#fcd34d', pcol:'#fde68a', secondary:'#fb923c', accent:'#6ee7b7', warm:'#f9a8d4', blob1:'#f59e0b', blob2:'#f97316', blob3:'#10b981' },
   mono:      { bg:'#080808', primary:'#d4d4d4', pcol:'#e5e5e5', secondary:'#a3a3a3', accent:'#737373', warm:'#d4d4d4', blob1:'#a3a3a3', blob2:'#737373', blob3:'#525252' },
+  midnight:  { bg:'#020818', primary:'#818cf8', pcol:'#a5b4fc', secondary:'#38bdf8', accent:'#34d399', warm:'#fbbf24', blob1:'#4f46e5', blob2:'#0ea5e9', blob3:'#10b981' },
+  sunset:    { bg:'#0f0514', primary:'#f472b6', pcol:'#f9a8d4', secondary:'#fb923c', accent:'#fbbf24', warm:'#a78bfa', blob1:'#ec4899', blob2:'#f97316', blob3:'#a855f7' },
+  arctic:    { bg:'#040e16', primary:'#7dd3fc', pcol:'#bae6fd', secondary:'#a5f3fc', accent:'#e0f2fe', warm:'#fde68a', blob1:'#38bdf8', blob2:'#67e8f9', blob3:'#e0f2fe' },
+  neon:      { bg:'#020208', primary:'#f0abfc', pcol:'#e879f9', secondary:'#a3e635', accent:'#22d3ee', warm:'#facc15', blob1:'#d946ef', blob2:'#84cc16', blob3:'#06b6d4' },
+  rose:      { bg:'#0f0709', primary:'#fb7185', pcol:'#fda4af', secondary:'#fcd34d', accent:'#f9a8d4', warm:'#fde68a', blob1:'#f43f5e', blob2:'#fbbf24', blob3:'#f9a8d4' },
+  amoled:    { bg:'#000000', primary:'#a78bfa', pcol:'#c4b5fd', secondary:'#6ee7b7', accent:'#fcd34d', warm:'#f9a8d4', blob1:'#7c3aed', blob2:'#059669', blob3:'#d97706' },
 };
 
 function hexRgb(h){ var r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16); return r+','+g+','+b; }
@@ -776,7 +782,26 @@ function fetchWeather(){
   };
   xhr.send();
 }
-fetchWeather(); setInterval(fetchWeather,600000);
+// Retry every 5s until weather arrives, then switch to 10-min polling
+var _wLoaded=false;
+function fetchWeather(){
+  var xhr=new XMLHttpRequest(); xhr.open("GET",SERVER+"/weather?t="+Date.now(),true); xhr.timeout=8000;
+  xhr.onreadystatechange=function(){
+    if(xhr.readyState!==4||xhr.status!==200) return;
+    try{
+      var d=JSON.parse(xhr.responseText);
+      if(d.temp!=='--') _wLoaded=true;
+      document.getElementById("w-icon").textContent=d.icon||"🌡";
+      document.getElementById("w-temp").textContent=d.temp+"°";
+      document.getElementById("w-desc").textContent=d.description;
+      document.getElementById("w-humidity").textContent=d.humidity+"% humid";
+      document.getElementById("w-wind").textContent=d.windspeed+" km/h";
+    } catch(e){}
+  };
+  xhr.send();
+}
+(function _retryW(){ fetchWeather(); if(!_wLoaded) setTimeout(_retryW,5000); })();
+setInterval(fetchWeather,600000);
 
 // ── FORECAST ──────────────────────────────────────────────────
 function fetchForecast(){
@@ -787,6 +812,7 @@ function fetchForecast(){
       var days=JSON.parse(xhr.responseText);
       var fcEl=document.getElementById("forecast-container");
       if(!days||!days.length) return;
+      _fcLoaded=true;
       fcEl.innerHTML="";
       for(var fi=0;fi<days.length;fi++){
         var day=days[fi]; var pct=Math.round(((day.hi-15)/(44-15))*100);
@@ -798,7 +824,9 @@ function fetchForecast(){
   };
   xhr.send();
 }
-fetchForecast(); setInterval(fetchForecast,1800000);
+var _fcLoaded=false;
+(function _retryF(){ fetchForecast(); if(!_fcLoaded) setTimeout(_retryF,5000); })();
+setInterval(fetchForecast,1800000);
 </script>
 </body>
 </html>
