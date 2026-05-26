@@ -15,7 +15,7 @@ echo.
 ::  EDIT THIS LINE if your dashboard folder is somewhere else
 ::  Default: C:\dashboard-server
 :: ============================================================
-cd /d C:\dashboard-server
+cd /d C:\Lofi-Dashboard\dashboard-server
 
 :: Check if Node.js is installed
 where node >nul 2>&1
