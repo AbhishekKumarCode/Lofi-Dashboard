@@ -767,22 +767,6 @@ fetchNowPlaying(); setInterval(fetchNowPlaying,3000);
 
 
 // ── WEATHER ───────────────────────────────────────────────────
-function fetchWeather(){
-  var xhr=new XMLHttpRequest(); xhr.open("GET",SERVER+"/weather?t="+Date.now(),true); xhr.timeout=8000;
-  xhr.onreadystatechange=function(){
-    if(xhr.readyState!==4||xhr.status!==200) return;
-    try{
-      var d=JSON.parse(xhr.responseText);
-      document.getElementById("w-icon").textContent=d.icon||"🌡";
-      document.getElementById("w-temp").textContent=d.temp+"°";
-      document.getElementById("w-desc").textContent=d.description;
-      document.getElementById("w-humidity").textContent=d.humidity+"% humid";
-      document.getElementById("w-wind").textContent=d.windspeed+" km/h";
-    } catch(e){}
-  };
-  xhr.send();
-}
-// Retry every 5s until weather arrives, then switch to 10-min polling
 var _wLoaded=false;
 function fetchWeather(){
   var xhr=new XMLHttpRequest(); xhr.open("GET",SERVER+"/weather?t="+Date.now(),true); xhr.timeout=8000;
@@ -790,7 +774,7 @@ function fetchWeather(){
     if(xhr.readyState!==4||xhr.status!==200) return;
     try{
       var d=JSON.parse(xhr.responseText);
-      if(d.temp!=='--') _wLoaded=true;
+      if(d.temp!=='--'){ _wLoaded=true; }
       document.getElementById("w-icon").textContent=d.icon||"🌡";
       document.getElementById("w-temp").textContent=d.temp+"°";
       document.getElementById("w-desc").textContent=d.description;
@@ -800,6 +784,7 @@ function fetchWeather(){
   };
   xhr.send();
 }
+// Retry every 5s until real data arrives, then 10-min polling
 (function _retryW(){ fetchWeather(); if(!_wLoaded) setTimeout(_retryW,5000); })();
 setInterval(fetchWeather,600000);
 
