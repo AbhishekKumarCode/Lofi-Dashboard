@@ -112,63 +112,83 @@ module.exports = function startServer(staticDir, settingsPath, onReady) {
 
   // ── WEATHER ─────────────────────────────────────────────────
   var https = require('https');
-  var weatherCodes = {0:'clear sky',1:'mostly clear',2:'partly cloudy',3:'overcast',45:'foggy',48:'foggy',51:'light drizzle',53:'drizzle',55:'heavy drizzle',61:'light rain',63:'rain',65:'heavy rain',71:'light snow',73:'snow',75:'heavy snow',80:'showers',81:'showers',82:'heavy showers',95:'thunderstorm',96:'thunderstorm',99:'thunderstorm'};
   var weatherIcons = {0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌧',63:'🌧',65:'🌧',71:'❄️',73:'❄️',75:'❄️',80:'🌦',81:'🌧',82:'⛈',95:'⛈',96:'⛈',99:'⛈'};
   var weatherData  = { temp:'--', description:'loading...', humidity:'--', windspeed:'--', icon:'🌡' };
+  var forecastData = [];
+  var weatherLog   = [];  // debug log
 
-  // Use Node https module — unlike fetch(), it has real timeout support
+  function wLog(msg) {
+    var entry = new Date().toISOString().slice(11,19) + ' ' + msg;
+    weatherLog.push(entry);
+    if (weatherLog.length > 30) weatherLog.shift();
+    console.log('[weather]', msg);
+  }
+
   function httpsGet(url, callback) {
-    var req = https.get(url, function(res) {
+    wLog('GET ' + url.slice(0,60));
+    var req = https.get(url, { timeout: 8000 }, function(res) {
       var body = '';
       res.on('data', function(d){ body += d; });
       res.on('end', function(){
-        try { callback(null, JSON.parse(body)); }
-        catch(e) { callback(e); }
+        try {
+          var parsed = JSON.parse(body);
+          wLog('OK status=' + res.statusCode + ' bytes=' + body.length);
+          callback(null, parsed);
+        } catch(e) { wLog('parse error: ' + e.message); callback(e); }
       });
     });
-    req.setTimeout(8000, function(){ req.destroy(); callback(new Error('timeout')); });
-    req.on('error', callback);
+    req.on('timeout', function(){ wLog('TIMEOUT'); req.destroy(); });
+    req.on('error', function(e){ wLog('ERROR: ' + e.message); callback(e); });
   }
 
   function updateWeather(retry) {
     httpsGet(
       'https://api.open-meteo.com/v1/forecast?latitude='+WEATHER_LAT+'&longitude='+WEATHER_LON+'&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code',
       function(err, data) {
-        if (err || !data || !data.current) {
+        if (!err && data && data.current) {
+          var c = data.current;
+          var wmap = {0:'clear sky',1:'mostly clear',2:'partly cloudy',3:'overcast',45:'foggy',51:'light drizzle',61:'light rain',63:'rain',65:'heavy rain',71:'light snow',73:'snow',80:'showers',95:'thunderstorm'};
+          weatherData = { temp:Math.round(c.temperature_2m), description:wmap[c.weather_code]||'clear', icon:weatherIcons[c.weather_code]||'🌡', humidity:c.relative_humidity_2m, windspeed:Math.round(c.wind_speed_10m) };
+          wLog('weather updated: ' + weatherData.temp + '°C');
+        } else {
+          wLog('weather failed, retries left: ' + retry);
           if (retry > 0) setTimeout(function(){ updateWeather(retry-1); }, 6000);
-          return;
         }
-        var c = data.current;
-        weatherData = { temp:Math.round(c.temperature_2m), description:weatherCodes[c.weather_code]||'clear', icon:weatherIcons[c.weather_code]||'🌡', humidity:c.relative_humidity_2m, windspeed:Math.round(c.wind_speed_10m) };
       }
     );
   }
-  updateWeather(10);
+  updateWeather(20);
   setInterval(function(){ updateWeather(3); }, 600000);
   app.get('/weather', function(req, res) { res.json(weatherData); });
 
   // ── FORECAST ────────────────────────────────────────────────
-  var forecastData = [];
   function updateForecast(retry) {
     httpsGet(
       'https://api.open-meteo.com/v1/forecast?latitude='+WEATHER_LAT+'&longitude='+WEATHER_LON+'&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=Asia%2FKolkata&forecast_days=5',
       function(err, data) {
-        if (err || !data || !data.daily || !data.daily.time) {
+        if (!err && data && data.daily && data.daily.time) {
+          var d = data.daily;
+          var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+          forecastData = [];
+          for (var i=0; i<d.time.length; i++) {
+            var day = new Date(d.time[i]);
+            forecastData.push({ day:i===0?'Today':days[day.getDay()], hi:Math.round(d.temperature_2m_max[i]), lo:Math.round(d.temperature_2m_min[i]), icon:weatherIcons[d.weather_code[i]]||'🌡', desc:'clear' });
+          }
+          wLog('forecast updated: ' + forecastData.length + ' days');
+        } else {
+          wLog('forecast failed, retries left: ' + retry);
           if (retry > 0) setTimeout(function(){ updateForecast(retry-1); }, 6000);
-          return;
-        }
-        var d = data.daily;
-        var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-        forecastData = [];
-        for (var i=0; i<d.time.length; i++) {
-          var day = new Date(d.time[i]);
-          forecastData.push({ day:i===0?'Today':days[day.getDay()], hi:Math.round(d.temperature_2m_max[i]), lo:Math.round(d.temperature_2m_min[i]), icon:weatherIcons[d.weather_code[i]]||'🌡', desc:weatherCodes[d.weather_code[i]]||'clear' });
         }
       }
     );
   }
-  updateForecast(10);
+  updateForecast(20);
   setInterval(function(){ updateForecast(3); }, 1800000);
+
+  // ── DEBUG endpoint — open http://192.168.1.13:3000/debug ────
+  app.get('/debug', function(req, res) {
+    res.json({ weatherData: weatherData, forecastCount: forecastData.length, log: weatherLog });
+  });
   app.get('/forecast', function(req, res) { res.json(forecastData); });
 
   // ── SETTINGS (theme + wallpaper) ────────────────────────────
