@@ -44,9 +44,15 @@ function startServer() {
 
   try {
     const startServerFn = require('./server-runner.js');
-    startServerFn(staticDir, settingsPath, function(port) {
+    startServerFn(staticDir, settingsPath, function(port, err) {
+      if (err && err.code === 'EADDRINUSE') {
+        send('log', `[panel] ⚠ Port ${port} already in use — dashboard already running\n`);
+        send('log', `[panel] 📱 Tablet connects → http://192.168.1.13:${port}\n`);
+        send('status', 'running');
+        return;
+      }
       send('log', `[panel] ✅ Server running → http://localhost:${port}\n`);
-      send('log', `[panel] 📱 Open on tablet  → http://192.168.1.13:${port}\n`);
+      send('log', `[panel] 📱 Tablet connects → http://192.168.1.13:${port}\n`);
       send('status', 'running');
     });
   } catch (err) {

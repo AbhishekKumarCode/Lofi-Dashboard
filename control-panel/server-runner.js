@@ -185,7 +185,13 @@ module.exports = function startServer(staticDir, settingsPath, onReady) {
   app.use(express.static(staticDir));
 
   // ── START ────────────────────────────────────────────────────
-  app.listen(PORT, '0.0.0.0', function() {
-    if (onReady) onReady(PORT);
+  var server = app.listen(PORT, '0.0.0.0', function() {
+    if (onReady) onReady(PORT, null);
+  });
+  server.on('error', function(err) {
+    if (err.code === 'EADDRINUSE') {
+      // Port already in use — another instance is likely running
+      if (onReady) onReady(PORT, err);
+    }
   });
 };

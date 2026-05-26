@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src http://localhost:3000 http://192.168.1.13:3000"/>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src http://localhost:3000 http://192.168.1.13:3000; img-src 'self' http://localhost:3000 data:"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;height:100%;overflow:hidden;background:#080610;color:#ede8f5;font-family:"Segoe UI",sans-serif;font-size:13px;user-select:none}
@@ -57,12 +57,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#080610;color:#ede8f
 
 /* ── theme picker ── */
 #theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.theme-swatch{border-radius:10px;padding:10px 8px;cursor:pointer;border:2px solid transparent;transition:border-color .18s,transform .12s;position:relative;overflow:hidden}
+.theme-swatch{border-radius:12px;padding:11px 10px;cursor:pointer;border:2px solid rgba(255,255,255,0.06);transition:border-color .18s,transform .12s,box-shadow .18s;position:relative;overflow:hidden}
+.theme-swatch::before{content:'';position:absolute;inset:0;opacity:0;background:rgba(255,255,255,0.06);transition:opacity .15s}
+.theme-swatch:hover::before{opacity:1}
 .theme-swatch:hover{transform:scale(1.04)}
-.theme-swatch.active{border-color:rgba(255,255,255,0.55)}
-.sw-dots{display:flex;gap:4px;margin-bottom:6px}
-.sw-dot{width:10px;height:10px;border-radius:50%}
-.sw-name{font-size:8.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;opacity:0.7}
+.theme-swatch.active{border-color:rgba(255,255,255,0.5);box-shadow:0 0 12px rgba(255,255,255,0.12)}
+.sw-dots{display:flex;gap:5px;margin-bottom:7px}
+.sw-dot{width:12px;height:12px;border-radius:50%;box-shadow:0 0 6px currentColor}
+.sw-name{font-size:8.5px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.7)}
 
 /* ── wallpaper picker ── */
 #wall-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
@@ -128,29 +130,65 @@ input:focus{border-color:rgba(167,139,250,0.5)}
     <div class="card">
       <div class="card-title">theme</div>
       <div id="theme-grid">
-        <div class="theme-swatch active" id="sw-lofi"    data-theme="lofi"    style="background:linear-gradient(135deg,#1a102e,#0d0620)" onclick="setTheme('lofi')">
-          <div class="sw-dots"><div class="sw-dot" style="background:#a78bfa"></div><div class="sw-dot" style="background:#f9a8d4"></div><div class="sw-dot" style="background:#6ee7b7"></div></div>
-          <div class="sw-name" style="color:#c4b5fd">lofi</div>
+        <div class="theme-swatch active" id="sw-lofi" data-theme="lofi"
+          style="background:linear-gradient(145deg,rgba(167,139,250,0.45) 0%,rgba(249,168,212,0.25) 45%,rgba(8,6,16,0.95) 100%)"
+          onclick="setTheme('lofi')">
+          <div class="sw-dots">
+            <div class="sw-dot" style="background:#a78bfa;color:#a78bfa"></div>
+            <div class="sw-dot" style="background:#f9a8d4;color:#f9a8d4"></div>
+            <div class="sw-dot" style="background:#6ee7b7;color:#6ee7b7"></div>
+          </div>
+          <div class="sw-name">lofi</div>
         </div>
-        <div class="theme-swatch" id="sw-ocean"   data-theme="ocean"   style="background:linear-gradient(135deg,#0a1929,#050d18)" onclick="setTheme('ocean')">
-          <div class="sw-dots"><div class="sw-dot" style="background:#60a5fa"></div><div class="sw-dot" style="background:#a5b4fc"></div><div class="sw-dot" style="background:#34d399"></div></div>
-          <div class="sw-name" style="color:#93c5fd">ocean</div>
+        <div class="theme-swatch" id="sw-ocean" data-theme="ocean"
+          style="background:linear-gradient(145deg,rgba(96,165,250,0.45) 0%,rgba(165,180,252,0.25) 45%,rgba(3,13,24,0.95) 100%)"
+          onclick="setTheme('ocean')">
+          <div class="sw-dots">
+            <div class="sw-dot" style="background:#60a5fa;color:#60a5fa"></div>
+            <div class="sw-dot" style="background:#a5b4fc;color:#a5b4fc"></div>
+            <div class="sw-dot" style="background:#34d399;color:#34d399"></div>
+          </div>
+          <div class="sw-name">ocean</div>
         </div>
-        <div class="theme-swatch" id="sw-forest"  data-theme="forest"  style="background:linear-gradient(135deg,#0a1f0c,#030c05)" onclick="setTheme('forest')">
-          <div class="sw-dots"><div class="sw-dot" style="background:#4ade80"></div><div class="sw-dot" style="background:#6ee7b7"></div><div class="sw-dot" style="background:#a78bfa"></div></div>
-          <div class="sw-name" style="color:#86efac">forest</div>
+        <div class="theme-swatch" id="sw-forest" data-theme="forest"
+          style="background:linear-gradient(145deg,rgba(74,222,128,0.45) 0%,rgba(110,231,183,0.25) 45%,rgba(3,12,5,0.95) 100%)"
+          onclick="setTheme('forest')">
+          <div class="sw-dots">
+            <div class="sw-dot" style="background:#4ade80;color:#4ade80"></div>
+            <div class="sw-dot" style="background:#6ee7b7;color:#6ee7b7"></div>
+            <div class="sw-dot" style="background:#a78bfa;color:#a78bfa"></div>
+          </div>
+          <div class="sw-name">forest</div>
         </div>
-        <div class="theme-swatch" id="sw-sakura"  data-theme="sakura"  style="background:linear-gradient(135deg,#2a0a14,#120508)" onclick="setTheme('sakura')">
-          <div class="sw-dots"><div class="sw-dot" style="background:#f9a8d4"></div><div class="sw-dot" style="background:#fda4af"></div><div class="sw-dot" style="background:#fbbf24"></div></div>
-          <div class="sw-name" style="color:#fbcfe8">sakura</div>
+        <div class="theme-swatch" id="sw-sakura" data-theme="sakura"
+          style="background:linear-gradient(145deg,rgba(249,168,212,0.45) 0%,rgba(253,164,175,0.25) 45%,rgba(18,5,8,0.95) 100%)"
+          onclick="setTheme('sakura')">
+          <div class="sw-dots">
+            <div class="sw-dot" style="background:#f9a8d4;color:#f9a8d4"></div>
+            <div class="sw-dot" style="background:#fda4af;color:#fda4af"></div>
+            <div class="sw-dot" style="background:#fbbf24;color:#fbbf24"></div>
+          </div>
+          <div class="sw-name">sakura</div>
         </div>
-        <div class="theme-swatch" id="sw-ember"   data-theme="ember"   style="background:linear-gradient(135deg,#1c0e00,#0e0600)" onclick="setTheme('ember')">
-          <div class="sw-dots"><div class="sw-dot" style="background:#fcd34d"></div><div class="sw-dot" style="background:#fb923c"></div><div class="sw-dot" style="background:#6ee7b7"></div></div>
-          <div class="sw-name" style="color:#fde68a">ember</div>
+        <div class="theme-swatch" id="sw-ember" data-theme="ember"
+          style="background:linear-gradient(145deg,rgba(252,211,77,0.45) 0%,rgba(251,146,60,0.3) 45%,rgba(14,6,0,0.95) 100%)"
+          onclick="setTheme('ember')">
+          <div class="sw-dots">
+            <div class="sw-dot" style="background:#fcd34d;color:#fcd34d"></div>
+            <div class="sw-dot" style="background:#fb923c;color:#fb923c"></div>
+            <div class="sw-dot" style="background:#6ee7b7;color:#6ee7b7"></div>
+          </div>
+          <div class="sw-name">ember</div>
         </div>
-        <div class="theme-swatch" id="sw-mono"    data-theme="mono"    style="background:linear-gradient(135deg,#181818,#080808)" onclick="setTheme('mono')">
-          <div class="sw-dots"><div class="sw-dot" style="background:#d4d4d4"></div><div class="sw-dot" style="background:#a3a3a3"></div><div class="sw-dot" style="background:#737373"></div></div>
-          <div class="sw-name" style="color:#e5e5e5">mono</div>
+        <div class="theme-swatch" id="sw-mono" data-theme="mono"
+          style="background:linear-gradient(145deg,rgba(212,212,212,0.35) 0%,rgba(115,115,115,0.2) 45%,rgba(8,8,8,0.95) 100%)"
+          onclick="setTheme('mono')">
+          <div class="sw-dots">
+            <div class="sw-dot" style="background:#d4d4d4;color:#d4d4d4"></div>
+            <div class="sw-dot" style="background:#a3a3a3;color:#a3a3a3"></div>
+            <div class="sw-dot" style="background:#737373;color:#737373"></div>
+          </div>
+          <div class="sw-name">mono</div>
         </div>
       </div>
     </div>
@@ -159,23 +197,12 @@ input:focus{border-color:rgba(167,139,250,0.5)}
     <div class="card">
       <div class="card-title">wallpaper</div>
       <div id="wall-grid">
-        <div class="wall-thumb active" id="wp-default"   data-wp="default"   data-label="lofi"
-          style="background-image:url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=320&q=40')"
-          onclick="setWallpaper('default')"></div>
-        <div class="wall-thumb" id="wp-rain"      data-wp="rain"      data-label="rain"
-          style="background-image:url('https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=320&q=40')"
-          onclick="setWallpaper('rain')"></div>
-        <div class="wall-thumb" id="wp-cafe"      data-wp="cafe"      data-label="café"
-          style="background-image:url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=320&q=40')"
-          onclick="setWallpaper('cafe')"></div>
-        <div class="wall-thumb" id="wp-city"      data-wp="city"      data-label="city"
-          style="background-image:url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=320&q=40')"
-          onclick="setWallpaper('city')"></div>
-        <div class="wall-thumb" id="wp-forest"    data-wp="forest"    data-label="forest"
-          style="background-image:url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=320&q=40')"
-          onclick="setWallpaper('forest')"></div>
-        <div class="wall-thumb wall-none" id="wp-none" data-wp="none" data-label="none"
-          onclick="setWallpaper('none')">✕</div>
+        <div class="wall-thumb active" id="wp-default" data-wp="default" data-label="lofi"   onclick="setWallpaper('default')"></div>
+        <div class="wall-thumb"        id="wp-rain"    data-wp="rain"    data-label="rain"   onclick="setWallpaper('rain')"></div>
+        <div class="wall-thumb"        id="wp-cafe"    data-wp="cafe"    data-label="café"   onclick="setWallpaper('cafe')"></div>
+        <div class="wall-thumb"        id="wp-city"    data-wp="city"    data-label="city"   onclick="setWallpaper('city')"></div>
+        <div class="wall-thumb"        id="wp-forest"  data-wp="forest"  data-label="forest" onclick="setWallpaper('forest')"></div>
+        <div class="wall-thumb wall-none" id="wp-none" data-wp="none"   data-label="none"   onclick="setWallpaper('none')">✕</div>
       </div>
       <div class="custom-row">
         <input type="text" id="custom-url" placeholder="custom image URL…"/>
@@ -200,6 +227,15 @@ api.on('status', function(s) {
   dot.className  = s;
   text.className = s;
   text.textContent = s === 'running' ? '● running on :3000' : s === 'error' ? '⚠ error — check log' : '○ stopped';
+
+  if (s === 'running') {
+    // Load wallpaper thumbnails via local proxy (avoids CSP/internet issues)
+    var ids = ['default','rain','cafe','city','forest'];
+    ids.forEach(function(id) {
+      var el = document.getElementById('wp-' + id);
+      if (el) el.style.backgroundImage = "url('" + SERVER + "/wallpaper?id=" + id + "')";
+    });
+  }
 });
 
 api.on('log', function(line) {
