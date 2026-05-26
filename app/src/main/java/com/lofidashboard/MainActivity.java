@@ -17,7 +17,7 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 
     // !! CHANGE THIS TO YOUR PC'S IP ADDRESS !!
-    private static final String DASHBOARD_URL = "http://192.168.1.8:3000";
+    private static final String DASHBOARD_URL = "http://192.168.1.13:3000";
 
     private WebView webView;
     private PowerManager.WakeLock wakeLock;
