@@ -59,13 +59,34 @@ module.exports = function startServer(staticDir, settingsPath, onReady) {
   app.get('/now-playing', function(req, res) { res.json(currentTrack); });
 
   // ── SPOTIFY CONTROLS ────────────────────────────────────────
-  function sendSpotifyKey(keys) {
-    var cmd = 'powershell -command "Add-Type -AssemblyName System.Windows.Forms; $s = Get-Process Spotify -ErrorAction SilentlyContinue | Where-Object {$_.MainWindowHandle -ne 0}; if ($s) { Add-Type @\'using System; using System.Runtime.InteropServices; public class W { [DllImport(\\"user32.dll\\")] public static extern bool SetForegroundWindow(IntPtr h); }\'; [W]::SetForegroundWindow($s.MainWindowHandle); Start-Sleep -Milliseconds 150; [System.Windows.Forms.SendKeys]::SendWait(\''+keys+'\') }"';
-    exec(cmd);
+  // Uses Windows media-key virtual codes (keybd_event) via
+  // PowerShell -EncodedCommand — works even when Spotify is
+  // minimised or sitting in the system tray.
+  var VK = { playpause: 0xB3, next: 0xB0, prev: 0xB1, volumeup: 0xAF, volumedown: 0xAE };
+
+  function sendMediaKey(vkCode) {
+    var script = [
+      'if (-not ([System.Management.Automation.PSTypeName]\'MK\').Type) {',
+      '  Add-Type -TypeDefinition @\'',
+      'using System;',
+      'using System.Runtime.InteropServices;',
+      'public class MK {',
+      '  [DllImport("user32.dll")]',
+      '  public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);',
+      '  public static void Press(byte vk) { keybd_event(vk,0,0,0); keybd_event(vk,0,2,0); }',
+      '}',
+      '\'@',
+      '}',
+      '[MK]::Press(' + vkCode + ')'
+    ].join('\r\n');
+    // -EncodedCommand avoids all shell-escaping headaches
+    var encoded = Buffer.from(script, 'utf16le').toString('base64');
+    exec('powershell -NoProfile -NonInteractive -EncodedCommand ' + encoded);
   }
+
   app.post('/control/:action', function(req, res) {
-    var map = { playpause:' ', next:'^{RIGHT}', prev:'^{LEFT}', volumeup:'^{UP}', volumedown:'^{DOWN}' };
-    if (map[req.params.action]) sendSpotifyKey(map[req.params.action]);
+    var vk = VK[req.params.action];
+    if (vk) sendMediaKey(vk);
     res.json({ ok: true });
   });
 
