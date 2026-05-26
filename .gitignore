@@ -24,3 +24,10 @@ Thumbs.db
 # Keys — never commit signing keys
 *.jks
 *.keystore
+
+# Dashboard user settings (theme/wallpaper prefs — local only)
+dashboard-server/settings.json
+
+# Control panel build output and deps
+control-panel/dist/
+control-panel/node_modules/

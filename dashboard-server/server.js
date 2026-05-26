@@ -145,6 +145,46 @@ app.get('/', function(req, res) {
 // serve other static files normally
 app.use(express.static(path.join(__dirname)));
 
+// ── SETTINGS (theme + wallpaper) ─────────────────────────────
+var SETTINGS_FILE = path.join(__dirname, 'settings.json');
+var appSettings = { theme: 'lofi', wallpaper: 'default' };
+try { appSettings = JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8')); } catch(e) {}
+
+app.get('/settings', function(req, res) { res.json(appSettings); });
+app.post('/settings', function(req, res) {
+  appSettings = Object.assign(appSettings, req.body);
+  try { fs.writeFileSync(SETTINGS_FILE, JSON.stringify(appSettings, null, 2)); } catch(e) {}
+  res.json({ ok: true });
+});
+
+// ── WALLPAPER PROXY — serves Unsplash images to tablet ───────
+var WALLPAPERS = {
+  default:   'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1280&q=60',
+  rain:      'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=1280&q=60',
+  cafe:      'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1280&q=60',
+  city:      'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1280&q=60',
+  forest:    'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1280&q=60',
+  mountains: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1280&q=60',
+};
+var wallpaperCache = {};
+
+app.get('/wallpaper', function(req, res) {
+  var id  = req.query.id  || 'default';
+  var url = req.query.url || WALLPAPERS[id] || WALLPAPERS.default;
+  var key = id === 'custom' ? url : id;
+  if (wallpaperCache[key]) {
+    res.setHeader('Content-Type', wallpaperCache[key].type);
+    return res.send(wallpaperCache[key].data);
+  }
+  fetch(url).then(function(r) { return r.arrayBuffer().then(function(buf) {
+    var data = Buffer.from(buf);
+    var type = r.headers.get('content-type') || 'image/jpeg';
+    wallpaperCache[key] = { data: data, type: type };
+    res.setHeader('Content-Type', type);
+    res.send(data);
+  }); }).catch(function() { res.status(500).end(); });
+});
+
 // ── FONT PROXY — tablet has no internet, PC does ─────────────
 var fontCssCache = null;
 var fontFileCache = {};

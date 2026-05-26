@@ -2,335 +2,263 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; script-src 'self' 'unsafe-inline'"/>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src http://localhost:3000 http://192.168.1.13:3000"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100%;height:100%;overflow:hidden;background:#080610;color:#ede8f5;font-family:"Segoe UI",sans-serif;font-size:13px}
+html,body{width:100%;height:100%;overflow:hidden;background:#080610;color:#ede8f5;font-family:"Segoe UI",sans-serif;font-size:13px;user-select:none}
 
 /* ── title bar ── */
-#titlebar{
-  height:38px;display:flex;align-items:center;justify-content:space-between;
-  padding:0 14px 0 16px;
-  background:rgba(26,16,46,0.98);
-  border-bottom:1px solid rgba(160,130,255,0.15);
-  -webkit-app-region:drag;
-  flex-shrink:0;
-}
-#titlebar-left{display:flex;align-items:center;gap:9px;pointer-events:none}
-#titlebar-dot{width:8px;height:8px;border-radius:50%;background:#a78bfa;box-shadow:0 0 6px #a78bfa88}
-#titlebar-name{font-size:11px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:rgba(210,200,235,0.55)}
-#titlebar-btns{display:flex;gap:6px;-webkit-app-region:no-drag}
-.tb-btn{width:28px;height:28px;border-radius:6px;border:none;background:none;cursor:pointer;color:rgba(210,200,235,0.35);font-size:15px;display:flex;align-items:center;justify-content:center;transition:background 0.15s,color 0.15s}
+#titlebar{height:38px;display:flex;align-items:center;justify-content:space-between;padding:0 14px 0 16px;background:rgba(26,16,46,0.98);border-bottom:1px solid rgba(160,130,255,0.15);-webkit-app-region:drag;flex-shrink:0}
+#tb-left{display:flex;align-items:center;gap:9px;pointer-events:none}
+#tb-dot{width:8px;height:8px;border-radius:50%;background:#a78bfa;box-shadow:0 0 6px #a78bfa88}
+#tb-name{font-size:11px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:rgba(210,200,235,0.5)}
+#tb-btns{display:flex;gap:6px;-webkit-app-region:no-drag}
+.tb-btn{width:28px;height:28px;border-radius:6px;border:none;background:none;cursor:pointer;color:rgba(210,200,235,0.3);font-size:14px;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s}
 .tb-btn:hover{background:rgba(167,139,250,0.15);color:#c4b5fd}
 #tb-close:hover{background:rgba(249,100,100,0.2);color:#fca5a5}
 
 /* ── layout ── */
 #body{display:flex;height:calc(100% - 38px);overflow:hidden}
-#left{flex:1;min-width:0;display:flex;flex-direction:column;padding:18px 16px 18px 20px;gap:16px;overflow-y:auto}
-#right{width:270px;flex-shrink:0;display:flex;flex-direction:column;padding:18px 20px 18px 14px;gap:16px;border-left:1px solid rgba(160,130,255,0.1);overflow-y:auto}
+#left{width:300px;flex-shrink:0;display:flex;flex-direction:column;padding:16px 14px 16px 18px;gap:14px;border-right:1px solid rgba(160,130,255,0.1);overflow-y:auto}
+#right{flex:1;min-width:0;display:flex;flex-direction:column;padding:16px 18px 16px 14px;gap:14px;overflow-y:auto}
 
-/* ── section cards ── */
-.section{background:rgba(26,16,46,0.85);border:1px solid rgba(160,130,255,0.18);border-radius:12px;padding:14px 16px}
-.section-title{font-size:8.5px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:rgba(180,160,230,0.38);margin-bottom:12px}
+/* ── cards ── */
+.card{background:rgba(26,16,46,0.85);border:1px solid rgba(160,130,255,0.18);border-radius:12px;padding:14px 16px}
+.card-title{font-size:8px;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;color:rgba(180,160,230,0.35);margin-bottom:12px}
 
-/* ── server section ── */
-#server-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-#status-dot{width:9px;height:9px;border-radius:50%;background:#6ee7b7;box-shadow:0 0 7px #6ee7b788;flex-shrink:0;transition:background 0.3s,box-shadow 0.3s}
-#status-dot.stopped{background:rgba(200,180,230,0.2);box-shadow:none}
-#status-dot.error{background:#fca5a5;box-shadow:0 0 7px #fca5a588}
-#status-text{font-size:11px;font-weight:600;color:rgba(210,200,235,0.6);flex:1}
-.btn-row{display:flex;gap:8px;flex-wrap:wrap}
-.btn{border:none;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:10.5px;font-weight:600;transition:opacity 0.15s,transform 0.1s;white-space:nowrap}
-.btn:active{transform:scale(0.95)}
-.btn-primary{background:rgba(167,139,250,0.2);border:1px solid rgba(167,139,250,0.4);color:#c4b5fd}
-.btn-primary:hover{background:rgba(167,139,250,0.32)}
-.btn-danger{background:rgba(249,168,212,0.1);border:1px solid rgba(249,168,212,0.3);color:rgba(249,168,212,0.7)}
-.btn-danger:hover{background:rgba(249,168,212,0.2)}
-.btn-mint{background:rgba(110,231,183,0.12);border:1px solid rgba(110,231,183,0.3);color:#6ee7b7}
-.btn-mint:hover{background:rgba(110,231,183,0.22)}
-.btn-dim{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(210,200,235,0.4)}
-.btn-dim:hover{background:rgba(255,255,255,0.09);color:rgba(210,200,235,0.7)}
-.btn-yellow{background:rgba(252,211,77,0.12);border:1px solid rgba(252,211,77,0.3);color:#fcd34d}
-.btn-yellow:hover{background:rgba(252,211,77,0.22)}
+/* ── status ── */
+#srv-row{display:flex;align-items:center;gap:9px;margin-bottom:11px}
+#srv-dot{width:9px;height:9px;border-radius:50%;background:rgba(200,180,230,0.18);flex-shrink:0;transition:background .3s,box-shadow .3s}
+#srv-dot.running{background:#6ee7b7;box-shadow:0 0 8px #6ee7b766}
+#srv-dot.error  {background:#fca5a5;box-shadow:0 0 8px #fca5a566}
+#srv-text{font-size:11px;font-weight:600;color:rgba(210,200,235,0.45)}
+#srv-text.running{color:#6ee7b7}
+
+/* ── buttons ── */
+.brow{display:flex;gap:7px;flex-wrap:wrap}
+.btn{border:none;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:10px;font-weight:600;transition:opacity .15s,transform .1s;font-family:inherit;white-space:nowrap;letter-spacing:0.03em}
+.btn:active{transform:scale(0.94)}
+.btn-p{background:rgba(167,139,250,0.2);border:1px solid rgba(167,139,250,0.38);color:#c4b5fd}
+.btn-p:hover{background:rgba(167,139,250,0.3)}
+.btn-d{background:rgba(249,168,212,0.08);border:1px solid rgba(249,168,212,0.25);color:rgba(249,168,212,0.65)}
+.btn-d:hover{background:rgba(249,168,212,0.16)}
+.btn-g{background:rgba(110,231,183,0.1);border:1px solid rgba(110,231,183,0.28);color:#6ee7b7}
+.btn-g:hover{background:rgba(110,231,183,0.2)}
+.btn-n{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(210,200,235,0.4)}
+.btn-n:hover{background:rgba(255,255,255,0.09);color:rgba(210,200,235,0.7)}
 
 /* ── log ── */
-#log-wrap{flex:1;min-height:0;display:flex;flex-direction:column}
-#log{
-  flex:1;min-height:120px;max-height:280px;
-  background:rgba(8,4,18,0.9);border:1px solid rgba(160,130,255,0.12);border-radius:8px;
-  padding:10px 12px;overflow-y:auto;
-  font-family:"Cascadia Code","Consolas",monospace;font-size:10.5px;line-height:1.7;
-  color:rgba(210,200,235,0.55);white-space:pre-wrap;word-break:break-all;
-}
+#log{flex:1;min-height:100px;background:rgba(4,2,12,0.92);border:1px solid rgba(160,130,255,0.1);border-radius:8px;padding:9px 11px;overflow-y:auto;font-family:"Cascadia Code","Consolas",monospace;font-size:10px;line-height:1.7;color:rgba(200,185,230,0.45);white-space:pre-wrap;word-break:break-all}
 #log .hi{color:#6ee7b7}
-#log .err{color:#fca5a5}
-.log-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.log-clear{font-size:9px;color:rgba(180,160,230,0.3);cursor:pointer;background:none;border:none;padding:2px 6px;border-radius:4px}
-.log-clear:hover{color:rgba(180,160,230,0.6);background:rgba(160,130,255,0.1)}
+#log .er{color:#fca5a5}
+.log-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.log-clear{font-size:9px;color:rgba(180,160,230,0.3);cursor:pointer;background:none;border:none;padding:2px 7px;border-radius:4px}
+.log-clear:hover{color:rgba(180,160,230,0.65);background:rgba(160,130,255,0.1)}
 
-/* ── apk section ── */
-#build-status-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
-#build-dot{width:7px;height:7px;border-radius:50%;background:rgba(200,180,230,0.2);flex-shrink:0}
-#build-dot.success{background:#6ee7b7;box-shadow:0 0 6px #6ee7b788}
-#build-dot.running{background:#fcd34d;box-shadow:0 0 6px #fcd34d88;animation:pulse 1s infinite}
-#build-dot.failure{background:#fca5a5;box-shadow:0 0 6px #fca5a588}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-#build-status-text{font-size:10.5px;color:rgba(210,200,235,0.5);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#build-time{font-size:9px;color:rgba(180,160,230,0.3)}
+/* ── theme picker ── */
+#theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.theme-swatch{border-radius:10px;padding:10px 8px;cursor:pointer;border:2px solid transparent;transition:border-color .18s,transform .12s;position:relative;overflow:hidden}
+.theme-swatch:hover{transform:scale(1.04)}
+.theme-swatch.active{border-color:rgba(255,255,255,0.55)}
+.sw-dots{display:flex;gap:4px;margin-bottom:6px}
+.sw-dot{width:10px;height:10px;border-radius:50%}
+.sw-name{font-size:8.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;opacity:0.7}
 
-/* ── settings section ── */
-.field-label{font-size:9px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(180,160,230,0.35);margin-bottom:5px}
-input[type=text],input[type=password]{
-  width:100%;background:rgba(8,4,18,0.8);border:1px solid rgba(160,130,255,0.2);
-  border-radius:7px;padding:7px 10px;color:#ede8f5;font-size:11.5px;font-family:inherit;
-  outline:none;transition:border-color 0.2s;
-}
+/* ── wallpaper picker ── */
+#wall-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
+.wall-thumb{border-radius:8px;aspect-ratio:16/9;background-size:cover;background-position:center;cursor:pointer;border:2px solid transparent;transition:border-color .18s,transform .12s;position:relative;overflow:hidden}
+.wall-thumb:hover{transform:scale(1.04)}
+.wall-thumb.active{border-color:rgba(255,255,255,0.6)}
+.wall-thumb::after{content:attr(data-label);position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.75));color:#fff;font-size:7.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:8px 5px 4px;text-align:center}
+.wall-none{background:rgba(8,4,18,0.9);border:1px dashed rgba(160,130,255,0.25);display:flex;align-items:center;justify-content:center;font-size:10px;color:rgba(180,160,230,0.4)}
+.custom-row{display:flex;gap:7px;align-items:center}
+input[type=text]{flex:1;background:rgba(8,4,18,0.8);border:1px solid rgba(160,130,255,0.2);border-radius:7px;padding:6px 10px;color:#ede8f5;font-size:11px;font-family:inherit;outline:none;transition:border-color .2s}
 input:focus{border-color:rgba(167,139,250,0.5)}
-.field{margin-bottom:10px}
-.save-row{display:flex;justify-content:flex-end;margin-top:4px}
-.toast{display:none;font-size:9.5px;color:#6ee7b7;padding:4px 0;text-align:right}
-.toast.show{display:block}
 
-/* ── info pills ── */
-.pill-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.info-pill{font-size:9px;padding:2px 9px;border-radius:20px;font-weight:600}
-.pill-purple{background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);color:rgba(196,181,253,0.7)}
-.pill-pink{background:rgba(249,168,212,0.1);border:1px solid rgba(249,168,212,0.2);color:rgba(249,168,212,0.7)}
+/* ── feedback toast ── */
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:rgba(26,16,46,0.97);border:1px solid rgba(110,231,183,0.3);color:#6ee7b7;font-size:10.5px;font-weight:600;padding:7px 18px;border-radius:20px;pointer-events:none;opacity:0;transition:opacity .25s;white-space:nowrap}
+#toast.show{opacity:1}
 
 /* scrollbar */
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(167,139,250,0.25);border-radius:4px}
-::-webkit-scrollbar-thumb:hover{background:rgba(167,139,250,0.45)}
+::-webkit-scrollbar-thumb{background:rgba(167,139,250,0.22);border-radius:4px}
 </style>
 </head>
 <body>
 
-<!-- TITLE BAR -->
 <div id="titlebar">
-  <div id="titlebar-left">
-    <div id="titlebar-dot"></div>
-    <span id="titlebar-name">lofi control panel</span>
-  </div>
-  <div id="titlebar-btns">
-    <button class="tb-btn" onclick="api.minimize()" title="Minimise">&#8211;</button>
-    <button class="tb-btn" id="tb-close" onclick="api.close()" title="Close">&#10005;</button>
+  <div id="tb-left"><div id="tb-dot"></div><span id="tb-name">lofi control panel</span></div>
+  <div id="tb-btns">
+    <button class="tb-btn" onclick="api.minimize()">&#8211;</button>
+    <button class="tb-btn" id="tb-close" onclick="api.close()">&#10005;</button>
   </div>
 </div>
 
-<!-- BODY -->
 <div id="body">
 
-  <!-- LEFT: server + log -->
+  <!-- LEFT: server control + log -->
   <div id="left">
-
-    <div class="section">
-      <div class="section-title">server</div>
-      <div id="server-row">
-        <div id="status-dot" class="stopped"></div>
-        <span id="status-text">stopped</span>
+    <div class="card">
+      <div class="card-title">server</div>
+      <div id="srv-row"><div id="srv-dot"></div><span id="srv-text">stopped</span></div>
+      <div class="brow">
+        <button class="btn btn-p" onclick="api.startServer()">▶ start</button>
+        <button class="btn btn-d" onclick="api.stopServer()">■ stop</button>
+        <button class="btn btn-n" onclick="api.restartServer()">↺ restart</button>
       </div>
-      <div class="btn-row">
-        <button class="btn btn-primary" onclick="api.startServer()">▶ start</button>
-        <button class="btn btn-danger"  onclick="api.stopServer()">■ stop</button>
-        <button class="btn btn-dim"     onclick="api.restartServer()">↺ restart</button>
-        <button class="btn btn-mint"    onclick="api.openDashboard()">↗ open dashboard</button>
-      </div>
-      <div class="pill-row">
-        <span class="info-pill pill-purple">192.168.1.13:3000</span>
-        <span class="info-pill pill-pink">Last.fm · Abhishek-29481</span>
+      <div class="brow" style="margin-top:7px">
+        <button class="btn btn-g" onclick="api.openDashboard()">↗ open dashboard</button>
       </div>
     </div>
 
-    <div class="section" style="flex:1;min-height:0;display:flex;flex-direction:column">
-      <div class="log-header">
-        <div class="section-title" style="margin-bottom:0">server log</div>
+    <div class="card" style="flex:1;min-height:0;display:flex;flex-direction:column">
+      <div class="log-hdr">
+        <div class="card-title" style="margin:0">log</div>
         <button class="log-clear" onclick="clearLog()">clear</button>
       </div>
-      <div id="log-wrap">
-        <div id="log"><span class="hi">lofi control panel ready.</span>&#10;</div>
-      </div>
+      <div id="log"><span class="hi">lofi control panel ready.</span>&#10;</div>
     </div>
-
   </div>
 
-  <!-- RIGHT: APK + settings -->
+  <!-- RIGHT: themes + wallpaper -->
   <div id="right">
 
-    <div class="section">
-      <div class="section-title">apk build</div>
-      <div id="build-status-row">
-        <div id="build-dot"></div>
-        <span id="build-status-text">—</span>
-      </div>
-      <div id="build-time"></div>
-      <div class="btn-row" style="margin-top:10px">
-        <button class="btn btn-yellow" onclick="triggerBuild()">⚙ rebuild apk</button>
-        <button class="btn btn-dim"    onclick="refreshBuildStatus()">↻ refresh</button>
-      </div>
-      <div class="btn-row" style="margin-top:8px">
-        <button class="btn btn-mint"   onclick="downloadApk()" id="dl-btn" disabled>↓ download apk</button>
-        <button class="btn btn-dim"    onclick="openActions()">↗ actions</button>
-      </div>
-      <div id="build-msg" style="font-size:9.5px;color:rgba(180,160,230,0.4);margin-top:8px"></div>
-    </div>
-
-    <div class="section" style="flex:1">
-      <div class="section-title">settings</div>
-      <div class="field">
-        <div class="field-label">github token (PAT)</div>
-        <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off"/>
-      </div>
-      <div class="field">
-        <div class="field-label">server.js path (optional)</div>
-        <input type="text" id="path-input" placeholder="auto-detect"/>
-      </div>
-      <div class="save-row">
-        <button class="btn btn-primary" onclick="saveSettings()">save</button>
-      </div>
-      <div class="toast" id="save-toast">✓ saved</div>
-
-      <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(160,130,255,0.1)">
-        <div class="section-title" style="margin-bottom:6px">about</div>
-        <div style="font-size:9.5px;color:rgba(180,160,230,0.35);line-height:1.7">
-          lofi dashboard · github.com/<br>AbhishekKumarCode/Lofi-Dashboard<br>
-          server auto-starts on open
+    <!-- THEMES -->
+    <div class="card">
+      <div class="card-title">theme</div>
+      <div id="theme-grid">
+        <div class="theme-swatch active" id="sw-lofi"    data-theme="lofi"    style="background:linear-gradient(135deg,#1a102e,#0d0620)" onclick="setTheme('lofi')">
+          <div class="sw-dots"><div class="sw-dot" style="background:#a78bfa"></div><div class="sw-dot" style="background:#f9a8d4"></div><div class="sw-dot" style="background:#6ee7b7"></div></div>
+          <div class="sw-name" style="color:#c4b5fd">lofi</div>
+        </div>
+        <div class="theme-swatch" id="sw-ocean"   data-theme="ocean"   style="background:linear-gradient(135deg,#0a1929,#050d18)" onclick="setTheme('ocean')">
+          <div class="sw-dots"><div class="sw-dot" style="background:#60a5fa"></div><div class="sw-dot" style="background:#a5b4fc"></div><div class="sw-dot" style="background:#34d399"></div></div>
+          <div class="sw-name" style="color:#93c5fd">ocean</div>
+        </div>
+        <div class="theme-swatch" id="sw-forest"  data-theme="forest"  style="background:linear-gradient(135deg,#0a1f0c,#030c05)" onclick="setTheme('forest')">
+          <div class="sw-dots"><div class="sw-dot" style="background:#4ade80"></div><div class="sw-dot" style="background:#6ee7b7"></div><div class="sw-dot" style="background:#a78bfa"></div></div>
+          <div class="sw-name" style="color:#86efac">forest</div>
+        </div>
+        <div class="theme-swatch" id="sw-sakura"  data-theme="sakura"  style="background:linear-gradient(135deg,#2a0a14,#120508)" onclick="setTheme('sakura')">
+          <div class="sw-dots"><div class="sw-dot" style="background:#f9a8d4"></div><div class="sw-dot" style="background:#fda4af"></div><div class="sw-dot" style="background:#fbbf24"></div></div>
+          <div class="sw-name" style="color:#fbcfe8">sakura</div>
+        </div>
+        <div class="theme-swatch" id="sw-ember"   data-theme="ember"   style="background:linear-gradient(135deg,#1c0e00,#0e0600)" onclick="setTheme('ember')">
+          <div class="sw-dots"><div class="sw-dot" style="background:#fcd34d"></div><div class="sw-dot" style="background:#fb923c"></div><div class="sw-dot" style="background:#6ee7b7"></div></div>
+          <div class="sw-name" style="color:#fde68a">ember</div>
+        </div>
+        <div class="theme-swatch" id="sw-mono"    data-theme="mono"    style="background:linear-gradient(135deg,#181818,#080808)" onclick="setTheme('mono')">
+          <div class="sw-dots"><div class="sw-dot" style="background:#d4d4d4"></div><div class="sw-dot" style="background:#a3a3a3"></div><div class="sw-dot" style="background:#737373"></div></div>
+          <div class="sw-name" style="color:#e5e5e5">mono</div>
         </div>
       </div>
     </div>
 
+    <!-- WALLPAPER -->
+    <div class="card">
+      <div class="card-title">wallpaper</div>
+      <div id="wall-grid">
+        <div class="wall-thumb active" id="wp-default"   data-wp="default"   data-label="lofi"
+          style="background-image:url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=320&q=40')"
+          onclick="setWallpaper('default')"></div>
+        <div class="wall-thumb" id="wp-rain"      data-wp="rain"      data-label="rain"
+          style="background-image:url('https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=320&q=40')"
+          onclick="setWallpaper('rain')"></div>
+        <div class="wall-thumb" id="wp-cafe"      data-wp="cafe"      data-label="café"
+          style="background-image:url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=320&q=40')"
+          onclick="setWallpaper('cafe')"></div>
+        <div class="wall-thumb" id="wp-city"      data-wp="city"      data-label="city"
+          style="background-image:url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=320&q=40')"
+          onclick="setWallpaper('city')"></div>
+        <div class="wall-thumb" id="wp-forest"    data-wp="forest"    data-label="forest"
+          style="background-image:url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=320&q=40')"
+          onclick="setWallpaper('forest')"></div>
+        <div class="wall-thumb wall-none" id="wp-none" data-wp="none" data-label="none"
+          onclick="setWallpaper('none')">✕</div>
+      </div>
+      <div class="custom-row">
+        <input type="text" id="custom-url" placeholder="custom image URL…"/>
+        <button class="btn btn-p" onclick="setCustomWallpaper()">apply</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
-<script>
-var token   = '';
-var lastRun = null;
+<div id="toast"></div>
 
-// ── receive events from main ──────────────────────────────────
+<script>
+var SERVER = 'http://localhost:3000';
+var currentTheme = 'lofi';
+var currentWall  = 'default';
+
+// ── events from main process ──────────────────────────────────
 api.on('status', function(s) {
-  var dot  = document.getElementById('status-dot');
-  var text = document.getElementById('status-text');
-  dot.className  = s;           // 'running' | 'stopped' | 'error'
-  text.textContent = s === 'running' ? '● running' : s === 'error' ? '⚠ error — check settings' : '○ stopped';
-  text.style.color = s === 'running' ? '#6ee7b7' : s === 'error' ? '#fca5a5' : 'rgba(210,200,235,0.45)';
+  var dot  = document.getElementById('srv-dot');
+  var text = document.getElementById('srv-text');
+  dot.className  = s;
+  text.className = s;
+  text.textContent = s === 'running' ? '● running on :3000' : s === 'error' ? '⚠ error — check log' : '○ stopped';
 });
 
 api.on('log', function(line) {
   var el  = document.getElementById('log');
-  var div = document.createElement('span');
-  if (line.includes('[err]') || line.includes('Error') || line.includes('error')) div.className = 'err';
-  else if (line.includes('RUNNING') || line.includes('ready') || line.includes('listening')) div.className = 'hi';
-  div.textContent = line;
-  el.appendChild(div);
+  var sp  = document.createElement('span');
+  if (line.match(/error|Error|err\]/i)) sp.className = 'er';
+  else if (line.match(/RUNNING|ready|listening|starting/i)) sp.className = 'hi';
+  sp.textContent = line;
+  el.appendChild(sp);
   el.scrollTop = el.scrollHeight;
-  // keep log from growing forever
-  while (el.children.length > 300) el.removeChild(el.firstChild);
+  while (el.children.length > 400) el.removeChild(el.firstChild);
 });
 
-api.on('config-loaded', function(cfg) {
-  token = cfg.token || '';
-  document.getElementById('token-input').value = token;
-  document.getElementById('path-input').value  = cfg.serverPath || '';
-  if (token) refreshBuildStatus();
-});
+function clearLog() { document.getElementById('log').innerHTML = ''; }
 
-// ── log helpers ───────────────────────────────────────────────
-function clearLog() {
-  document.getElementById('log').innerHTML = '';
+// ── settings helpers ──────────────────────────────────────────
+function postSettings(data) {
+  fetch(SERVER + '/settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  }).catch(function() { toast('⚠ server not running'); });
 }
 
-// ── settings ──────────────────────────────────────────────────
-function saveSettings() {
-  token = document.getElementById('token-input').value.trim();
-  var p = document.getElementById('path-input').value.trim();
-  api.saveConfig({ token: token, serverPath: p });
-  var t = document.getElementById('save-toast');
-  t.className = 'toast show';
-  setTimeout(function() { t.className = 'toast'; }, 2000);
-  if (token) refreshBuildStatus();
+function toast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(function() { el.className = ''; }, 2200);
 }
 
-// ── APK build ─────────────────────────────────────────────────
-function triggerBuild() {
-  if (!token) { setBuildMsg('⚠ save a GitHub token first'); return; }
-  setBuildMsg('triggering build…');
-  api.triggerBuild(token).then(function(r) {
-    if (r.ok) {
-      setBuildMsg('✓ build queued — check Actions tab');
-      setRunStatus({ status: 'queued', conclusion: null });
-      setTimeout(refreshBuildStatus, 4000);
-    } else {
-      setBuildMsg('✗ failed (HTTP ' + r.status + ') — check token has workflow scope');
-    }
-  });
+// ── theme ─────────────────────────────────────────────────────
+function setTheme(key) {
+  document.querySelectorAll('.theme-swatch').forEach(function(el) { el.classList.remove('active'); });
+  var sw = document.getElementById('sw-' + key);
+  if (sw) sw.classList.add('active');
+  currentTheme = key;
+  postSettings({ theme: key });
+  toast('theme → ' + key);
 }
 
-function refreshBuildStatus() {
-  if (!token) return;
-  api.getLatestRun(token).then(function(run) {
-    if (!run) { setBuildStatus('—', null, null); return; }
-    lastRun = run;
-    setRunStatus(run);
-    // auto-refresh while running
-    if (run.status === 'in_progress' || run.status === 'queued') {
-      setTimeout(refreshBuildStatus, 8000);
-    }
-  });
+// ── wallpaper ─────────────────────────────────────────────────
+function setWallpaper(id) {
+  document.querySelectorAll('.wall-thumb').forEach(function(el) { el.classList.remove('active'); });
+  var wp = document.getElementById('wp-' + id);
+  if (wp) wp.classList.add('active');
+  currentWall = id;
+  postSettings({ wallpaper: id, wallpaperUrl: '' });
+  toast('wallpaper → ' + id);
 }
 
-function setRunStatus(run) {
-  var dot  = document.getElementById('build-dot');
-  var text = document.getElementById('build-status-text');
-  var time = document.getElementById('build-time');
-  var dl   = document.getElementById('dl-btn');
-
-  dot.className = '';
-  if (run.status === 'completed') {
-    dot.className = run.conclusion === 'success' ? 'success' : 'failure';
-    text.textContent = run.conclusion === 'success' ? '✓ completed' : '✗ ' + (run.conclusion || 'failed');
-  } else {
-    dot.className = 'running';
-    text.textContent = run.status === 'queued' ? '⏳ queued…' : '⟳ building…';
-  }
-
-  if (run.updatedAt) {
-    time.textContent = 'updated ' + timeAgo(run.updatedAt);
-  }
-
-  dl.disabled = !(run.status === 'completed' && run.conclusion === 'success');
-}
-
-function setBuildStatus(text, dotClass, timeText) {
-  document.getElementById('build-status-text').textContent = text;
-  document.getElementById('build-dot').className = dotClass || '';
-  document.getElementById('build-time').textContent = timeText || '';
-}
-
-function setBuildMsg(msg) {
-  document.getElementById('build-msg').textContent = msg;
-  setTimeout(function() { document.getElementById('build-msg').textContent = ''; }, 5000);
-}
-
-function downloadApk() {
-  if (!lastRun) return;
-  api.getApkUrl(token, lastRun.id).then(function(r) {
-    if (!r) { setBuildMsg('⚠ no artifact found'); return; }
-    // GitHub artifact download requires auth — open Actions page instead
-    setBuildMsg('↗ opening Actions — click the artifact to download');
-    api.openUrl(lastRun.url);
-  });
-}
-
-function openActions() {
-  api.openUrl('https://github.com/AbhishekKumarCode/Lofi-Dashboard/actions');
-}
-
-// ── time helper ───────────────────────────────────────────────
-function timeAgo(iso) {
-  var diff = Math.floor((Date.now() - new Date(iso)) / 1000);
-  if (diff < 60)  return diff + 's ago';
-  if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
-  return Math.floor(diff / 3600) + 'h ago';
+function setCustomWallpaper() {
+  var url = document.getElementById('custom-url').value.trim();
+  if (!url) return;
+  document.querySelectorAll('.wall-thumb').forEach(function(el) { el.classList.remove('active'); });
+  currentWall = 'custom';
+  postSettings({ wallpaper: 'custom', wallpaperUrl: url });
+  toast('custom wallpaper set');
 }
 </script>
 </body>
