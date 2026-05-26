@@ -42,7 +42,7 @@ function fetchLastFm() {
     var albumArt = '';
     for (var i=0; i<images.length; i++) { if (images[i].size === 'large') { albumArt = images[i]['#text']; break; } }
     var newTitle = track.name || '';
-    var newArtist = (track.artist && track.artist['#text']) || '';
+    var newArtist = (track.artist && (track.artist.name || track.artist['#text'])) || '';
     // detect song change — reset scrobble time
     if (newTitle !== currentTrack.title || newArtist !== currentTrack.artist) {
       currentTrack.scrobbledAt = isPlaying ? Date.now() : 0;
@@ -144,6 +144,41 @@ app.get('/', function(req, res) {
 
 // serve other static files normally
 app.use(express.static(path.join(__dirname)));
+
+// ── FONT PROXY — tablet has no internet, PC does ─────────────
+var fontCssCache = null;
+var fontFileCache = {};
+var GFONTS_URL = 'https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,300;0,400;0,600;0,700;1,300&family=Lora:ital,wght@0,400;0,600;1,400;1,600&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap';
+
+app.get('/font-css', function(req, res) {
+  res.setHeader('Content-Type', 'text/css');
+  if (fontCssCache) return res.send(fontCssCache);
+  fetch(GFONTS_URL, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120' } })
+    .then(function(r) { return r.text(); })
+    .then(function(css) {
+      // rewrite font file URLs to route through this server
+      fontCssCache = css.replace(/url\((https:\/\/fonts\.gstatic\.com[^)]+)\)/g, "url('/font-file?u=$1')");
+      res.send(fontCssCache);
+    })
+    .catch(function() { res.status(500).send(''); });
+});
+
+app.get('/font-file', function(req, res) {
+  var url = req.query.u;
+  if (!url || !url.startsWith('https://fonts.gstatic.com')) return res.status(400).end();
+  if (fontFileCache[url]) {
+    res.setHeader('Content-Type', 'font/woff2');
+    return res.send(fontFileCache[url]);
+  }
+  fetch(url)
+    .then(function(r) { return r.arrayBuffer(); })
+    .then(function(buf) {
+      fontFileCache[url] = Buffer.from(buf);
+      res.setHeader('Content-Type', 'font/woff2');
+      res.send(fontFileCache[url]);
+    })
+    .catch(function() { res.status(500).end(); });
+});
 
 app.listen(PORT, '0.0.0.0', function() {
   console.log('');
