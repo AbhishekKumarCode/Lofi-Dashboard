@@ -51,8 +51,8 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:"Josefin Sans",sans
 /* grid placement */
 .cell-time   { grid-column:1; grid-row:1; }
 .cell-cats   { grid-column:3; grid-row:1 / span 2; } /* cats spans rows 1+2 */
-.cell-timer  { grid-column:1; grid-row:2; }
-.cell-week   { grid-column:2; grid-row:1 / span 2; } /* forecast fills col 2 rows 1+2 */
+.cell-timer  { grid-column:2; grid-row:1 / span 2; } /* timer fills col 2 rows 1+2 */
+.cell-week   { grid-column:1; grid-row:2; }          /* forecast back to col 1 row 2 */
 .cell-play   { grid-column:1 / span 2; grid-row:3; } /* playbar spans cols 1+2 */
 .cell-viz    { grid-column:3; grid-row:3; }
 
@@ -78,11 +78,21 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:"Josefin Sans",sans
 .cat-dot.on{background:#f9a8d4}
 
 /* ════ POMODORO ════ */
-.pom-wrap{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;gap:7px;height:calc(100% - 22px)}
-.pom-ring{width:62px;height:62px;border-radius:50%;border:2px solid rgba(196,181,253,0.22);display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center}
-.pom-num{font-size:18px;font-weight:700;color:#c4b5fd;line-height:1;font-family:"Courier Prime",monospace}
-.pom-sub{font-size:8.5px;color:rgba(180,160,230,0.3);font-weight:600;text-align:center}
-.pom-btn{font-size:9px;background:rgba(167,139,250,0.14);border:1px solid rgba(167,139,250,0.28);color:#c4b5fd;border-radius:20px;padding:4px 14px;cursor:pointer;font-family:"Josefin Sans",sans-serif;font-weight:700}
+.pom-wrap{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;gap:13px;height:calc(100% - 22px)}
+.pom-mode-lbl{font-size:8px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(180,160,230,0.38);font-weight:700;font-family:"Courier Prime",monospace}
+.pom-ring-wrap{position:relative;width:148px;height:148px;-webkit-flex-shrink:0;flex-shrink:0}
+.pom-svg{width:148px;height:148px;display:block;-webkit-transform:rotate(-90deg);transform:rotate(-90deg)}
+.pom-track{fill:none;stroke:rgba(196,181,253,0.1);stroke-width:6}
+.pom-progress{fill:none;stroke:url(#pomGrad);stroke-width:6;stroke-linecap:round;stroke-dasharray:401;stroke-dashoffset:0;-webkit-transition:stroke-dashoffset 0.9s ease;transition:stroke-dashoffset 0.9s ease}
+.pom-center{position:absolute;top:50%;left:50%;-webkit-transform:translate(-50%,-50%);transform:translate(-50%,-50%);text-align:center;pointer-events:none}
+.pom-num{font-size:36px;font-weight:700;color:#c4b5fd;line-height:1;font-family:"Courier Prime",monospace;letter-spacing:0.02em}
+.pom-sub{font-size:9.5px;color:rgba(180,160,230,0.35);font-family:"Lora",serif;font-style:italic;text-align:center}
+.pom-btns{display:-webkit-box;display:-webkit-flex;display:flex;gap:10px;-webkit-box-align:center;-webkit-align-items:center;align-items:center}
+.pom-btn{border-radius:20px;cursor:pointer;font-family:"Josefin Sans",sans-serif;font-weight:700;-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-transition:-webkit-transform 0.12s;transition:transform 0.12s}
+.pom-btn:active{-webkit-transform:scale(0.91);transform:scale(0.91)}
+.pom-btn-main{font-size:11px;background:rgba(167,139,250,0.18);border:1px solid rgba(167,139,250,0.35);color:#c4b5fd;padding:9px 26px;min-height:40px}
+.pom-btn-reset{font-size:9.5px;background:rgba(249,168,212,0.07);border:1px solid rgba(249,168,212,0.2);color:rgba(249,168,212,0.45);padding:8px 16px;min-height:40px}
+.pom-sessions{font-size:13px;color:rgba(167,139,250,0.3);letter-spacing:5px}
 
 /* ════ FORECAST ════ */
 .fc-row{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;gap:6px;margin-bottom:7px}
@@ -171,11 +181,30 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:"Josefin Sans",sans
 
   <!-- TIMER (POMODORO) -->
   <div class="card cell-timer">
-    <div class="lbl">focus</div>
+    <div class="lbl">focus timer</div>
     <div class="pom-wrap">
-      <div class="pom-ring"><div class="pom-num" id="pom-display">25:00</div></div>
-      <div class="pom-sub" id="pom-state">ready</div>
-      <button class="pom-btn" id="pom-btn" onclick="togglePomodoro()">start</button>
+      <div class="pom-mode-lbl" id="pom-mode">work session</div>
+      <div class="pom-ring-wrap">
+        <svg class="pom-svg" viewBox="0 0 148 148">
+          <defs>
+            <linearGradient id="pomGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#a78bfa"/>
+              <stop offset="100%" style="stop-color:#f9a8d4"/>
+            </linearGradient>
+          </defs>
+          <circle class="pom-track"    cx="74" cy="74" r="64"/>
+          <circle class="pom-progress" cx="74" cy="74" r="64" id="pom-ring"/>
+        </svg>
+        <div class="pom-center">
+          <div class="pom-num" id="pom-display">25:00</div>
+        </div>
+      </div>
+      <div class="pom-sub" id="pom-state">ready to focus</div>
+      <div class="pom-btns">
+        <button class="pom-btn pom-btn-reset" onclick="resetPomodoro()">reset</button>
+        <button class="pom-btn pom-btn-main" id="pom-btn" onclick="togglePomodoro()">start</button>
+      </div>
+      <div class="pom-sessions" id="pom-sessions">○ ○ ○ ○</div>
     </div>
   </div>
 
@@ -509,18 +538,58 @@ var moodIdx=0;
 setInterval(function(){ moodIdx=(moodIdx+1)%moods.length; document.getElementById("mood-text").textContent=moods[moodIdx]; },12000);
 
 // ── POMODORO ──────────────────────────────────────────────────
-var pomSeconds=25*60,pomRunning=false,pomInterval=null;
+var POM_CIRC=401; // 2π×64 ≈ 402, rounded to 401 for clean dasharray
+var pomMode="work",pomTotal=25*60,pomSeconds=25*60;
+var pomRunning=false,pomInterval=null,pomDone=0;
+
+function pomRing(){
+  var el=document.getElementById("pom-ring"); if(!el) return;
+  el.style.strokeDashoffset=POM_CIRC*(1-pomSeconds/pomTotal);
+}
+function pomDots(){
+  var s=""; for(var i=0;i<4;i++) s+=(i<pomDone?"●":"○")+(i<3?" ":"");
+  document.getElementById("pom-sessions").textContent=s;
+}
+function resetPomodoro(){
+  clearInterval(pomInterval); pomRunning=false;
+  pomMode="work"; pomTotal=25*60; pomSeconds=25*60; pomDone=0;
+  document.getElementById("pom-display").textContent="25:00";
+  document.getElementById("pom-btn").textContent="start";
+  document.getElementById("pom-state").textContent="ready to focus";
+  document.getElementById("pom-mode").textContent="work session";
+  pomRing(); pomDots();
+}
 function togglePomodoro(){
   pomRunning=!pomRunning;
   var btn=document.getElementById("pom-btn"),state=document.getElementById("pom-state");
   if(pomRunning){
-    btn.textContent="pause"; state.textContent="focusing";
+    btn.textContent="pause";
+    state.textContent=(pomMode==="work")?"focusing...":"resting...";
     pomInterval=setInterval(function(){
-      if(pomSeconds>0){ pomSeconds--; document.getElementById("pom-display").textContent=pad2(Math.floor(pomSeconds/60))+":"+pad2(pomSeconds%60); }
-      else { clearInterval(pomInterval);pomRunning=false;btn.textContent="restart";state.textContent="break ☕";pomSeconds=25*60; }
+      if(pomSeconds>0){
+        pomSeconds--;
+        document.getElementById("pom-display").textContent=pad2(Math.floor(pomSeconds/60))+":"+pad2(pomSeconds%60);
+        pomRing();
+      } else {
+        clearInterval(pomInterval); pomRunning=false;
+        if(pomMode==="work"){
+          pomDone=(pomDone+1)%5; pomDots();
+          pomMode="break"; pomTotal=5*60; pomSeconds=5*60;
+          document.getElementById("pom-mode").textContent="break time";
+          document.getElementById("pom-display").textContent="05:00";
+          btn.textContent="start break"; state.textContent="nice work! ☕";
+        } else {
+          pomMode="work"; pomTotal=25*60; pomSeconds=25*60;
+          document.getElementById("pom-mode").textContent="work session";
+          document.getElementById("pom-display").textContent="25:00";
+          btn.textContent="start focus"; state.textContent="break done ✓";
+        }
+        pomRing();
+      }
     },1000);
-  } else { clearInterval(pomInterval);btn.textContent="resume";state.textContent="paused"; }
+  } else { clearInterval(pomInterval); btn.textContent="resume"; state.textContent="paused"; }
 }
+pomRing(); pomDots();
 
 // ── SPOTIFY + SMOOTH PROGRESS BAR ────────────────────────────
 var lastTitle="", lastArtist="", lastArt="";
