@@ -1,0 +1,23 @@
+{
+  "name": "lofi-control-panel",
+  "version": "1.0.0",
+  "description": "Lofi Dashboard Desktop Control Panel",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win portable"
+  },
+  "build": {
+    "appId": "com.lofidashboard.controlpanel",
+    "productName": "Lofi Control Panel",
+    "directories": { "output": "dist" },
+    "win": {
+      "target": [{ "target": "portable", "arch": ["x64"] }]
+    },
+    "files": ["main.js", "preload.js", "renderer.html"]
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3"
+  }
+}
