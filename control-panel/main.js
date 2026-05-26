@@ -6,8 +6,10 @@ const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');
 const fs   = require('fs');
 
-let win        = null;
+let win          = null;
 let serverStarted = false;
+let lastStatus   = 'stopped';      // cached so we can replay it after window loads
+const logBuffer  = [];             // buffer early log lines for replay
 
 // ── Path helpers ─────────────────────────────────────────────
 function getStaticDir() {
@@ -20,17 +22,24 @@ function getSettingsPath() {
   return path.join(app.getPath('userData'), 'settings.json');
 }
 
-// ── Send to renderer safely ───────────────────────────────────
+// ── Send to renderer safely — buffers if window not ready ────
 function send(ch, ...args) {
-  if (win && !win.isDestroyed()) win.webContents.send(ch, ...args);
+  if (win && !win.isDestroyed()) {
+    win.webContents.send(ch, ...args);
+  } else if (ch === 'log') {
+    logBuffer.push(args[0]);       // keep last 50 lines for replay
+    if (logBuffer.length > 50) logBuffer.shift();
+  } else if (ch === 'status') {
+    lastStatus = args[0];
+  }
 }
 
-// ── Server control (in-process) ───────────────────────────────
+// ── Server control (starts immediately, no window needed) ────
 function startServer() {
   if (serverStarted) return;
   serverStarted = true;
 
-  const staticDir   = getStaticDir();
+  const staticDir    = getStaticDir();
   const settingsPath = getSettingsPath();
 
   send('log', `[panel] staticDir  → ${staticDir}\n`);
@@ -51,7 +60,7 @@ function startServer() {
         send('status', 'running');
         return;
       }
-      send('log', `[panel] ✅ Server running → http://localhost:${port}\n`);
+      send('log', `[panel] ✅ Server running on :${port}\n`);
       send('log', `[panel] 📱 Tablet connects → http://192.168.1.13:${port}\n`);
       send('status', 'running');
     });
@@ -75,13 +84,20 @@ function createWindow() {
     },
   });
   win.loadFile(path.join(__dirname, 'renderer.html'));
+
+  // Once the renderer is ready, replay buffered logs + current status
+  win.webContents.once('did-finish-load', () => {
+    logBuffer.forEach(line => win.webContents.send('log', line));
+    win.webContents.send('status', lastStatus);
+  });
+
   win.on('closed', () => { win = null; });
 }
 
 // ── App lifecycle ────────────────────────────────────────────
 app.whenReady().then(() => {
+  startServer();    // ← starts immediately, before window even opens
   createWindow();
-  win.webContents.once('did-finish-load', () => startServer());
 });
 app.on('window-all-closed', () => app.quit());
 
