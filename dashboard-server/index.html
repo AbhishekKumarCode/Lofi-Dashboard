@@ -49,24 +49,24 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:"Josefin Sans",sans
 .lbl{font-size:8px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(180,160,230,0.35);margin-bottom:7px;font-weight:700;font-family:"Courier Prime",monospace}
 
 /* grid placement */
-.cell-time   { grid-column:1; grid-row:1; }
+.cell-time   { grid-column:2; grid-row:1 / span 2; } /* clock+weather fills col 2 rows 1+2 */
 .cell-cats   { grid-column:3; grid-row:1 / span 2; } /* cats spans rows 1+2 */
-.cell-timer  { grid-column:2; grid-row:1 / span 2; } /* timer fills col 2 rows 1+2 */
-.cell-week   { grid-column:1; grid-row:2; }          /* forecast back to col 1 row 2 */
+.cell-timer  { grid-column:1; grid-row:1; }          /* timer col 1 row 1 */
+.cell-week   { grid-column:1; grid-row:2; }          /* forecast col 1 row 2 */
 .cell-play   { grid-column:1 / span 2; grid-row:3; } /* playbar spans cols 1+2 */
 .cell-viz    { grid-column:3; grid-row:3; }
 
 /* ════ TIME + TEMP ════ */
-.clock-wrap{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;height:100%;text-align:center;gap:3px}
-.clock-time{font-size:50px;font-weight:700;line-height:1;letter-spacing:0.04em;color:#c4b5fd;font-family:"Courier Prime",monospace}
-.clock-secs{font-size:18px;font-weight:400;color:rgba(196,181,253,0.36);font-family:"Courier Prime",monospace}
-.clock-date{font-size:11px;color:rgba(210,200,235,0.4);font-style:italic;font-family:"Lora",serif;margin-bottom:6px}
-.temp-row{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;gap:7px;margin-top:2px}
-.temp-icon{font-size:22px;line-height:1}
-.temp-val{font-size:28px;font-weight:700;color:#6ee7b7;font-family:"Courier Prime",monospace;line-height:1}
-.temp-desc{font-size:10px;color:rgba(210,200,235,0.38);font-style:italic;font-family:"Lora",serif}
-.temp-pills{display:-webkit-box;display:-webkit-flex;display:flex;gap:5px;margin-top:5px;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center}
-.pill{font-size:8px;padding:2px 8px;border-radius:20px;font-weight:600;font-family:"Courier Prime",monospace}
+.clock-wrap{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;height:100%;text-align:center;gap:6px}
+.clock-time{font-size:72px;font-weight:700;line-height:1;letter-spacing:0.04em;color:#c4b5fd;font-family:"Courier Prime",monospace}
+.clock-secs{font-size:24px;font-weight:400;color:rgba(196,181,253,0.36);font-family:"Courier Prime",monospace}
+.clock-date{font-size:13px;color:rgba(210,200,235,0.4);font-style:italic;font-family:"Lora",serif;margin-bottom:8px}
+.temp-row{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;gap:10px;margin-top:4px}
+.temp-icon{font-size:32px;line-height:1}
+.temp-val{font-size:42px;font-weight:700;color:#6ee7b7;font-family:"Courier Prime",monospace;line-height:1}
+.temp-desc{font-size:12px;color:rgba(210,200,235,0.38);font-style:italic;font-family:"Lora",serif}
+.temp-pills{display:-webkit-box;display:-webkit-flex;display:flex;gap:7px;margin-top:8px;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center}
+.pill{font-size:9px;padding:3px 11px;border-radius:20px;font-weight:600;font-family:"Courier Prime",monospace}
 
 
 /* ════ CATS — spans 2 rows, full height ════ */
@@ -78,21 +78,21 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:"Josefin Sans",sans
 .cat-dot.on{background:#f9a8d4}
 
 /* ════ POMODORO ════ */
-.pom-wrap{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;gap:13px;height:calc(100% - 22px)}
-.pom-mode-lbl{font-size:8px;letter-spacing:0.25em;text-transform:uppercase;color:rgba(180,160,230,0.38);font-weight:700;font-family:"Courier Prime",monospace}
-.pom-ring-wrap{position:relative;width:148px;height:148px;-webkit-flex-shrink:0;flex-shrink:0}
-.pom-svg{width:148px;height:148px;display:block;-webkit-transform:rotate(-90deg);transform:rotate(-90deg)}
-.pom-track{fill:none;stroke:rgba(196,181,253,0.1);stroke-width:6}
-.pom-progress{fill:none;stroke:url(#pomGrad);stroke-width:6;stroke-linecap:round;stroke-dasharray:401;stroke-dashoffset:0;-webkit-transition:stroke-dashoffset 0.9s ease;transition:stroke-dashoffset 0.9s ease}
+.pom-wrap{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;gap:6px;height:calc(100% - 22px)}
+.pom-mode-lbl{font-size:7.5px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(180,160,230,0.38);font-weight:700;font-family:"Courier Prime",monospace}
+.pom-ring-wrap{position:relative;width:100px;height:100px;-webkit-flex-shrink:0;flex-shrink:0}
+.pom-svg{width:100px;height:100px;display:block;-webkit-transform:rotate(-90deg);transform:rotate(-90deg)}
+.pom-track{fill:none;stroke:rgba(196,181,253,0.1);stroke-width:5}
+.pom-progress{fill:none;stroke:url(#pomGrad);stroke-width:5;stroke-linecap:round;stroke-dasharray:277;stroke-dashoffset:0;-webkit-transition:stroke-dashoffset 0.9s ease;transition:stroke-dashoffset 0.9s ease}
 .pom-center{position:absolute;top:50%;left:50%;-webkit-transform:translate(-50%,-50%);transform:translate(-50%,-50%);text-align:center;pointer-events:none}
-.pom-num{font-size:36px;font-weight:700;color:#c4b5fd;line-height:1;font-family:"Courier Prime",monospace;letter-spacing:0.02em}
-.pom-sub{font-size:9.5px;color:rgba(180,160,230,0.35);font-family:"Lora",serif;font-style:italic;text-align:center}
-.pom-btns{display:-webkit-box;display:-webkit-flex;display:flex;gap:10px;-webkit-box-align:center;-webkit-align-items:center;align-items:center}
+.pom-num{font-size:24px;font-weight:700;color:#c4b5fd;line-height:1;font-family:"Courier Prime",monospace;letter-spacing:0.02em}
+.pom-sub{font-size:8.5px;color:rgba(180,160,230,0.35);font-family:"Lora",serif;font-style:italic;text-align:center}
+.pom-btns{display:-webkit-box;display:-webkit-flex;display:flex;gap:8px;-webkit-box-align:center;-webkit-align-items:center;align-items:center}
 .pom-btn{border-radius:20px;cursor:pointer;font-family:"Josefin Sans",sans-serif;font-weight:700;-webkit-tap-highlight-color:transparent;touch-action:manipulation;-webkit-transition:-webkit-transform 0.12s;transition:transform 0.12s}
 .pom-btn:active{-webkit-transform:scale(0.91);transform:scale(0.91)}
-.pom-btn-main{font-size:11px;background:rgba(167,139,250,0.18);border:1px solid rgba(167,139,250,0.35);color:#c4b5fd;padding:9px 26px;min-height:40px}
-.pom-btn-reset{font-size:9.5px;background:rgba(249,168,212,0.07);border:1px solid rgba(249,168,212,0.2);color:rgba(249,168,212,0.45);padding:8px 16px;min-height:40px}
-.pom-sessions{font-size:13px;color:rgba(167,139,250,0.3);letter-spacing:5px}
+.pom-btn-main{font-size:10px;background:rgba(167,139,250,0.18);border:1px solid rgba(167,139,250,0.35);color:#c4b5fd;padding:7px 20px;min-height:34px}
+.pom-btn-reset{font-size:9px;background:rgba(249,168,212,0.07);border:1px solid rgba(249,168,212,0.2);color:rgba(249,168,212,0.45);padding:6px 13px;min-height:34px}
+.pom-sessions{font-size:11px;color:rgba(167,139,250,0.3);letter-spacing:4px}
 
 /* ════ FORECAST ════ */
 .fc-row{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;gap:6px;margin-bottom:7px}
@@ -185,15 +185,15 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:"Josefin Sans",sans
     <div class="pom-wrap">
       <div class="pom-mode-lbl" id="pom-mode">work session</div>
       <div class="pom-ring-wrap">
-        <svg class="pom-svg" viewBox="0 0 148 148">
+        <svg class="pom-svg" viewBox="0 0 100 100">
           <defs>
             <linearGradient id="pomGrad" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" style="stop-color:#a78bfa"/>
               <stop offset="100%" style="stop-color:#f9a8d4"/>
             </linearGradient>
           </defs>
-          <circle class="pom-track"    cx="74" cy="74" r="64"/>
-          <circle class="pom-progress" cx="74" cy="74" r="64" id="pom-ring"/>
+          <circle class="pom-track"    cx="50" cy="50" r="44"/>
+          <circle class="pom-progress" cx="50" cy="50" r="44" id="pom-ring"/>
         </svg>
         <div class="pom-center">
           <div class="pom-num" id="pom-display">25:00</div>
@@ -538,7 +538,7 @@ var moodIdx=0;
 setInterval(function(){ moodIdx=(moodIdx+1)%moods.length; document.getElementById("mood-text").textContent=moods[moodIdx]; },12000);
 
 // ── POMODORO ──────────────────────────────────────────────────
-var POM_CIRC=401; // 2π×64 ≈ 402, rounded to 401 for clean dasharray
+var POM_CIRC=277; // 2π×44 ≈ 276.5, matches stroke-dasharray
 var pomMode="work",pomTotal=25*60,pomSeconds=25*60;
 var pomRunning=false,pomInterval=null,pomDone=0;
 
