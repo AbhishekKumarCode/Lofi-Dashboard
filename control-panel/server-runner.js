@@ -111,48 +111,64 @@ module.exports = function startServer(staticDir, settingsPath, onReady) {
   app.get('/pc-stats', function(req, res) { res.json(pcStats); });
 
   // ── WEATHER ─────────────────────────────────────────────────
+  var https = require('https');
   var weatherCodes = {0:'clear sky',1:'mostly clear',2:'partly cloudy',3:'overcast',45:'foggy',48:'foggy',51:'light drizzle',53:'drizzle',55:'heavy drizzle',61:'light rain',63:'rain',65:'heavy rain',71:'light snow',73:'snow',75:'heavy snow',80:'showers',81:'showers',82:'heavy showers',95:'thunderstorm',96:'thunderstorm',99:'thunderstorm'};
   var weatherIcons = {0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌧',63:'🌧',65:'🌧',71:'❄️',73:'❄️',75:'❄️',80:'🌦',81:'🌧',82:'⛈',95:'⛈',96:'⛈',99:'⛈'};
   var weatherData  = { temp:'--', description:'loading...', humidity:'--', windspeed:'--', icon:'🌡' };
 
-  function updateWeather(retry) {
-    fetch('https://api.open-meteo.com/v1/forecast?latitude='+WEATHER_LAT+'&longitude='+WEATHER_LON+'&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code')
-      .then(function(r){ return r.json(); })
-      .then(function(data) {
-        var c = data.current;
-        if (!c) throw new Error('no current data');
-        weatherData = { temp:Math.round(c.temperature_2m), description:weatherCodes[c.weather_code]||'clear', icon:weatherIcons[c.weather_code]||'🌡', humidity:c.relative_humidity_2m, windspeed:Math.round(c.wind_speed_10m) };
-      })
-      .catch(function() {
-        // retry up to 10 times, every 6s, until first successful load
-        if (retry > 0) setTimeout(function(){ updateWeather(retry-1); }, 6000);
+  // Use Node https module — unlike fetch(), it has real timeout support
+  function httpsGet(url, callback) {
+    var req = https.get(url, function(res) {
+      var body = '';
+      res.on('data', function(d){ body += d; });
+      res.on('end', function(){
+        try { callback(null, JSON.parse(body)); }
+        catch(e) { callback(e); }
       });
+    });
+    req.setTimeout(8000, function(){ req.destroy(); callback(new Error('timeout')); });
+    req.on('error', callback);
+  }
+
+  function updateWeather(retry) {
+    httpsGet(
+      'https://api.open-meteo.com/v1/forecast?latitude='+WEATHER_LAT+'&longitude='+WEATHER_LON+'&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code',
+      function(err, data) {
+        if (err || !data || !data.current) {
+          if (retry > 0) setTimeout(function(){ updateWeather(retry-1); }, 6000);
+          return;
+        }
+        var c = data.current;
+        weatherData = { temp:Math.round(c.temperature_2m), description:weatherCodes[c.weather_code]||'clear', icon:weatherIcons[c.weather_code]||'🌡', humidity:c.relative_humidity_2m, windspeed:Math.round(c.wind_speed_10m) };
+      }
+    );
   }
   updateWeather(10);
-  setInterval(function(){ updateWeather(0); }, 600000);
+  setInterval(function(){ updateWeather(3); }, 600000);
   app.get('/weather', function(req, res) { res.json(weatherData); });
 
   // ── FORECAST ────────────────────────────────────────────────
   var forecastData = [];
   function updateForecast(retry) {
-    fetch('https://api.open-meteo.com/v1/forecast?latitude='+WEATHER_LAT+'&longitude='+WEATHER_LON+'&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=Asia%2FKolkata&forecast_days=5')
-      .then(function(r){ return r.json(); })
-      .then(function(data) {
+    httpsGet(
+      'https://api.open-meteo.com/v1/forecast?latitude='+WEATHER_LAT+'&longitude='+WEATHER_LON+'&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=Asia%2FKolkata&forecast_days=5',
+      function(err, data) {
+        if (err || !data || !data.daily || !data.daily.time) {
+          if (retry > 0) setTimeout(function(){ updateForecast(retry-1); }, 6000);
+          return;
+        }
         var d = data.daily;
-        if (!d || !d.time) throw new Error('no daily data');
         var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
         forecastData = [];
         for (var i=0; i<d.time.length; i++) {
           var day = new Date(d.time[i]);
           forecastData.push({ day:i===0?'Today':days[day.getDay()], hi:Math.round(d.temperature_2m_max[i]), lo:Math.round(d.temperature_2m_min[i]), icon:weatherIcons[d.weather_code[i]]||'🌡', desc:weatherCodes[d.weather_code[i]]||'clear' });
         }
-      })
-      .catch(function() {
-        if (retry > 0) setTimeout(function(){ updateForecast(retry-1); }, 6000);
-      });
+      }
+    );
   }
   updateForecast(10);
-  setInterval(function(){ updateForecast(0); }, 1800000);
+  setInterval(function(){ updateForecast(3); }, 1800000);
   app.get('/forecast', function(req, res) { res.json(forecastData); });
 
   // ── SETTINGS (theme + wallpaper) ────────────────────────────
