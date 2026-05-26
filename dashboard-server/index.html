@@ -50,10 +50,9 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:"Josefin Sans",sans
 
 /* grid placement */
 .cell-time   { grid-column:1; grid-row:1; }
-.cell-stats  { grid-column:2; grid-row:1; }
 .cell-cats   { grid-column:3; grid-row:1 / span 2; } /* cats spans rows 1+2 */
 .cell-timer  { grid-column:1; grid-row:2; }
-.cell-week   { grid-column:2; grid-row:2; }
+.cell-week   { grid-column:2; grid-row:1 / span 2; } /* forecast fills col 2 rows 1+2 */
 .cell-play   { grid-column:1 / span 2; grid-row:3; } /* playbar spans cols 1+2 */
 .cell-viz    { grid-column:3; grid-row:3; }
 
@@ -69,13 +68,6 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:"Josefin Sans",sans
 .temp-pills{display:-webkit-box;display:-webkit-flex;display:flex;gap:5px;margin-top:5px;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center}
 .pill{font-size:8px;padding:2px 8px;border-radius:20px;font-weight:600;font-family:"Courier Prime",monospace}
 
-/* ════ PC STATS ════ */
-.stat-row{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;gap:8px;margin-bottom:8px}
-.stat-row:last-child{margin-bottom:0}
-.stat-name{font-size:9px;color:rgba(180,160,230,0.38);width:30px;-webkit-flex-shrink:0;flex-shrink:0;font-weight:700;font-family:"Courier Prime",monospace}
-.stat-bg{-webkit-box-flex:1;-webkit-flex:1;flex:1;height:5px;background:rgba(255,255,255,0.07);border-radius:5px}
-.stat-fill{height:5px;border-radius:5px;-webkit-transition:width 1.5s ease;transition:width 1.5s ease}
-.stat-val{font-size:10px;width:32px;text-align:right;font-weight:700;font-family:"Courier Prime",monospace}
 
 /* ════ CATS — spans 2 rows, full height ════ */
 .cat-wrap{position:relative;width:100%;height:calc(100% - 22px);overflow:hidden;border-radius:12px;background:rgba(0,0,0,0.2)}
@@ -167,30 +159,6 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:"Josefin Sans",sans
     </div>
   </div>
 
-  <!-- PC STATS -->
-  <div class="card cell-stats">
-    <div class="lbl"><span class="conn-dot" id="conn-dot"></span>pc health</div>
-    <div class="stat-row">
-      <span class="stat-name">cpu</span>
-      <div class="stat-bg"><div class="stat-fill" id="stat-cpu" style="background:-webkit-linear-gradient(left,#a78bfa,#c4b5fd);background:linear-gradient(to right,#a78bfa,#c4b5fd);width:0%"></div></div>
-      <span class="stat-val" id="val-cpu" style="color:#c4b5fd">0%</span>
-    </div>
-    <div class="stat-row">
-      <span class="stat-name">ram</span>
-      <div class="stat-bg"><div class="stat-fill" id="stat-ram" style="background:-webkit-linear-gradient(left,#f9a8d4,#fca5a5);background:linear-gradient(to right,#f9a8d4,#fca5a5);width:0%"></div></div>
-      <span class="stat-val" id="val-ram" style="color:#f9a8d4">0%</span>
-    </div>
-    <div class="stat-row">
-      <span class="stat-name">gpu</span>
-      <div class="stat-bg"><div class="stat-fill" id="stat-gpu" style="background:-webkit-linear-gradient(left,#6ee7b7,#93c5fd);background:linear-gradient(to right,#6ee7b7,#93c5fd);width:0%"></div></div>
-      <span class="stat-val" id="val-gpu" style="color:#6ee7b7">0%</span>
-    </div>
-    <div class="stat-row">
-      <span class="stat-name">tmp</span>
-      <div class="stat-bg"><div class="stat-fill" id="stat-temp" style="background:-webkit-linear-gradient(left,#fcd34d,#fb923c);background:linear-gradient(to right,#fcd34d,#fb923c);width:0%"></div></div>
-      <span class="stat-val" id="val-temp" style="color:#fcd34d">0°</span>
-    </div>
-  </div>
 
   <!-- CATS — ASCII animated -->
   <div class="card cell-cats" style="display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column">
@@ -220,7 +188,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:"Josefin Sans",sans
   <!-- PLAYBAR — spans cols 1+2 -->
   <div class="card cell-play">
     <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 6% 50%,rgba(167,139,250,0.1),transparent 55%);pointer-events:none;border-radius:16px"></div>
-    <div class="lbl">now playing · spotify</div>
+    <div class="lbl"><span class="conn-dot" id="conn-dot"></span>now playing · spotify</div>
     <div class="music-inner">
       <div class="album-wrap">
         <img id="album-art" src="" class="album-img"/>
@@ -624,22 +592,6 @@ function fetchNowPlaying(){
 function spotifyControl(a){ var xhr=new XMLHttpRequest(); xhr.open("POST",SERVER+"/control/"+a,true); xhr.send(); setTimeout(fetchNowPlaying,800); }
 fetchNowPlaying(); setInterval(fetchNowPlaying,3000);
 
-// ── PC STATS ──────────────────────────────────────────────────
-function fetchStats(){
-  var xhr=new XMLHttpRequest(); xhr.open("GET",SERVER+"/pc-stats?t="+Date.now(),true); xhr.timeout=4000;
-  xhr.onreadystatechange=function(){
-    if(xhr.readyState!==4||xhr.status!==200) return;
-    try{
-      var d=JSON.parse(xhr.responseText);
-      document.getElementById("stat-cpu").style.width=d.cpu+"%"; document.getElementById("val-cpu").textContent=d.cpu+"%";
-      document.getElementById("stat-ram").style.width=d.ram+"%"; document.getElementById("val-ram").textContent=d.ram+"%";
-      document.getElementById("stat-gpu").style.width=d.gpu+"%"; document.getElementById("val-gpu").textContent=d.gpu+"%";
-      document.getElementById("stat-temp").style.width=Math.min(d.temp,100)+"%"; document.getElementById("val-temp").textContent=d.temp+"°";
-    } catch(e){}
-  };
-  xhr.send();
-}
-fetchStats(); setInterval(fetchStats,5000);
 
 // ── WEATHER ───────────────────────────────────────────────────
 function fetchWeather(){
