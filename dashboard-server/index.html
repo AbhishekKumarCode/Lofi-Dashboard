@@ -104,22 +104,25 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:"Josefin Sans",sans
 .fc-temps{font-size:10px;font-weight:700;color:#fcd34d;width:46px;text-align:right;-webkit-flex-shrink:0;flex-shrink:0;font-family:"Courier Prime",monospace}
 
 /* ════ MUSIC PLAYBAR ════ */
-.music-inner{display:-webkit-box;display:-webkit-flex;display:flex;gap:0;-webkit-box-align:center;-webkit-align-items:center;align-items:center;height:calc(100% - 22px)}
-.album-wrap{position:relative;-webkit-flex-shrink:0;flex-shrink:0;margin-right:22px}
-.album-img{width:118px;height:118px;border-radius:14px;object-fit:cover;display:block;border:2px solid rgba(160,130,255,0.25);background:rgba(167,139,250,0.15);-webkit-box-shadow:0 4px 24px rgba(167,139,250,0.25);box-shadow:0 4px 24px rgba(167,139,250,0.25)}
-/* overlay hidden always — removed pause icon */
+.music-inner{display:-webkit-box;display:-webkit-flex;display:flex;gap:22px;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;height:calc(100% - 22px)}
+.album-wrap{position:relative;-webkit-flex-shrink:0;flex-shrink:0}
+.album-img{width:110px;height:110px;border-radius:14px;object-fit:cover;display:block;border:2px solid rgba(160,130,255,0.25);background:rgba(167,139,250,0.15);-webkit-box-shadow:0 4px 24px rgba(167,139,250,0.25);box-shadow:0 4px 24px rgba(167,139,250,0.25)}
 .album-paused-overlay{display:none}
-.track-info{-webkit-box-flex:1;-webkit-flex:1;flex:1;min-width:0;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;gap:10px}
-.track-name{font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ede8f5;font-family:"Josefin Sans",sans-serif;line-height:1.2}
+.track-info{min-width:0;max-width:520px;width:100%;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;gap:7px}
+.track-title-row{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;gap:8px;min-width:0}
+.track-name{font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ede8f5;font-family:"Josefin Sans",sans-serif;line-height:1.2;-webkit-flex:1;flex:1;min-width:0}
 .track-artist{font-size:13px;color:rgba(210,200,235,0.48);font-style:italic;font-family:"Lora",serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .progress-bg{height:5px;background:rgba(255,255,255,0.08);border-radius:5px;width:100%}
 .progress-fill{height:5px;border-radius:5px;background:-webkit-linear-gradient(left,#a78bfa,#f9a8d4,#fcd34d);background:linear-gradient(to right,#a78bfa,#f9a8d4,#fcd34d);width:0%;-webkit-transition:width 0.5s linear;transition:width 0.5s linear}
-.controls{display:-webkit-box;display:-webkit-flex;display:flex;gap:18px;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center}
-.ctrl-btn{background:none;border:none;cursor:pointer;font-size:26px;color:rgba(210,200,235,0.4);padding:10px 14px;line-height:1;min-width:48px;min-height:48px;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-.ctrl-btn.active{color:#c4b5fd;font-size:30px}
+.controls{display:-webkit-box;display:-webkit-flex;display:flex;gap:4px;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center}
+.vol-row{display:-webkit-box;display:-webkit-flex;display:flex;gap:2px;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;margin-top:2px}
+.ctrl-btn{background:none;border:none;cursor:pointer;font-size:24px;color:rgba(210,200,235,0.4);padding:8px 12px;line-height:1;min-width:44px;min-height:44px;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.ctrl-btn.active{color:#c4b5fd;font-size:28px}
 .ctrl-btn:active{color:#a78bfa;-webkit-transform:scale(0.88);transform:scale(0.88)}
-.music-status{font-size:9px;color:rgba(180,160,230,0.26);font-weight:700;letter-spacing:0.08em;font-family:"Courier Prime",monospace}
-.music-status.live{color:#6ee7b7}
+.vol-btn{background:none;border:none;cursor:pointer;font-size:18px;color:rgba(210,200,235,0.28);padding:6px 10px;line-height:1;min-width:38px;min-height:38px;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.vol-btn:active{color:#a78bfa;-webkit-transform:scale(0.88);transform:scale(0.88)}
+.music-status{font-size:7.5px;font-weight:700;letter-spacing:0.18em;font-family:"Courier Prime",monospace;color:rgba(180,160,230,0.22);background:rgba(180,160,230,0.07);border:1px solid rgba(180,160,230,0.14);padding:2px 7px;border-radius:20px;-webkit-flex-shrink:0;flex-shrink:0;white-space:nowrap}
+.music-status.live{color:#6ee7b7;background:rgba(110,231,183,0.1);border-color:rgba(110,231,183,0.28)}
 
 /* ════ VISUALIZER ════ */
 .viz-inner{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;height:100%;-webkit-box-pack:end;-webkit-justify-content:flex-end;justify-content:flex-end;gap:8px}
@@ -223,17 +226,21 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:"Josefin Sans",sans
         <img id="album-art" src="" class="album-img"/>
       </div>
       <div class="track-info">
-        <div class="track-name" id="track-name">connecting...</div>
+        <div class="track-title-row">
+          <div class="track-name" id="track-name">connecting...</div>
+          <span class="music-status" id="music-status">live</span>
+        </div>
         <div class="track-artist" id="track-artist">waiting for spotify</div>
         <div class="progress-bg"><div class="progress-fill" id="progress-fill"></div></div>
-        <div id="progress-time" style="font-size:8px;color:rgba(180,160,230,0.35);font-family:'Courier Prime',monospace;text-align:right;margin-top:2px">0:00 / 0:00</div>
+        <div id="progress-time" style="font-size:8px;color:rgba(180,160,230,0.35);font-family:'Courier Prime',monospace;text-align:right;margin-top:1px">0:00 / 0:00</div>
         <div class="controls">
           <button class="ctrl-btn" onclick="spotifyControl('prev')">⏮</button>
           <button class="ctrl-btn active" id="play-btn" onclick="spotifyControl('playpause')">⏸</button>
           <button class="ctrl-btn" onclick="spotifyControl('next')">⏭</button>
-          <button class="ctrl-btn" onclick="spotifyControl('volumedown')">🔉</button>
-          <button class="ctrl-btn" onclick="spotifyControl('volumeup')">🔊</button>
-          <span class="music-status" id="music-status">live</span>
+        </div>
+        <div class="vol-row">
+          <button class="vol-btn" onclick="spotifyControl('volumedown')">🔉</button>
+          <button class="vol-btn" onclick="spotifyControl('volumeup')">🔊</button>
         </div>
       </div>
     </div>
@@ -282,7 +289,8 @@ function applyTheme(key) {
     'stop:first-child{stop-color:'+p+'}','stop:last-child{stop-color:'+s+'}',
     '.fc-bar-fill{background:linear-gradient(to right,'+pc+','+s+','+w+')}',
     '.progress-fill{background:linear-gradient(to right,'+p+','+s+')}',
-    '.ctrl-btn.active{color:'+pc+'}','.music-status.live{color:'+a+'}',
+    '.ctrl-btn.active{color:'+pc+'}',
+    '.music-status.live{color:'+a+';background:rgba('+hexRgb(a)+',0.1);border-color:rgba('+hexRgb(a)+',0.28)}',
     '.track-name{color:#ede8f5}',
     '.pom-btn-main{background:rgba('+hexRgb(p)+',0.18);border-color:rgba('+hexRgb(p)+',0.35);color:'+pc+'}',
     '.pom-btn-reset{background:rgba('+hexRgb(s)+',0.08);border-color:rgba('+hexRgb(s)+',0.22);color:rgba('+hexRgb(s)+',0.55)}',
