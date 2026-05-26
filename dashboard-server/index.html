@@ -184,12 +184,13 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:"Josefin Sans",sans
   </div>
 
 
-  <!-- CATS — ASCII animated -->
-  <div class="card cell-cats" style="display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column">
+  <!-- CATS — ASCII animated (tap to switch) -->
+  <div class="card cell-cats" style="display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;cursor:pointer" onclick="nextCat()">
     <div class="lbl">little friends 🐱</div>
     <div id="ascii-cat" style="-webkit-box-flex:1;-webkit-flex:1;flex:1;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center">
-      <pre id="cat-pre" style="font-family:'Courier Prime',monospace;font-size:17px;line-height:1.5;color:#f9a8d4;text-align:center;white-space:pre;-webkit-user-select:none;user-select:none"></pre>
+      <pre id="cat-pre" style="font-family:'Courier Prime',monospace;font-size:17px;line-height:1.55;color:#f9a8d4;text-align:center;white-space:pre;-webkit-user-select:none;user-select:none;-webkit-transition:opacity 0.22s ease;transition:opacity 0.22s ease"></pre>
       <div id="cat-name" style="font-size:11px;color:rgba(249,168,212,0.4);font-family:'Lora',serif;font-style:italic;margin-top:6px"></div>
+      <div style="font-size:8px;color:rgba(249,168,212,0.16);font-family:'Courier Prime',monospace;margin-top:3px;letter-spacing:0.14em">tap to switch</div>
     </div>
   </div>
 
@@ -374,129 +375,145 @@ function updateClock(){
 updateClock(); setInterval(updateClock,1000);
 
 // ── ASCII CATS ────────────────────────────────────────────────
-// ── ASCII CATS ────────────────────────────────────────────────
 var catPre  = document.getElementById("cat-pre");
 var catName = document.getElementById("cat-name");
 
-// each cat is an array of frames, each frame is a string
 var ASCII_CATS = [
 
-  // 1. NYAN CAT — the legend
-  { name: "nyan cat ★", color: "#f9a8d4", speed: 180, frames: [
-    "+☆*+☆*+☆*+☆\n,---,\n|^_^|━━━━\n'---'★彡  \n*+☆*+☆*+☆+",
-    "*+☆*+☆*+☆*\n ,---,     \n |^_^|━━━━ \n '---' ★彡 \n+☆*+☆*+☆*+",
-    "☆*+☆*+☆*+☆\n  ,---,    \n  |^_^|━━━━\n  '---'★彡 \n*+☆*+☆*+☆*",
-    "+☆*+☆*+☆*+\n ,---,     \n |^_^|━━━━ \n '---' ★彡 \n☆*+☆*+☆*+☆",
-    "*+☆*+☆*+☆*\n,---,      \n|^_^|━━━━  \n'---'★彡   \n+☆*+☆*+☆*+"
+  // 1 · NYAN CAT — reimagined with cycling rainbow trail
+  { name:"nyan cat ★", color:"#f9a8d4", speed:190, frames:[
+    "· ★ · ˚ · ★ · ˚ ·\n  ,------,\n░▒▓| ♥  ♥ |═══/\\_/\\\n░▒▓| ████ |  ( >ω< )\n░▒▓| ♥  ♥ |   nyaa~\n  '------'",
+    "· ★ · ˚ · ★ · ˚ ·\n  ,------,\n▒▓░| ♥  ♥ |═══/\\_/\\\n▒▓░| ████ |  ( ≧ω≦ )\n▒▓░| ♥  ♥ |   nyaa~\n  '------'",
+    "· ★ · ˚ · ★ · ˚ ·\n  ,------,\n▓░▒| ♥  ♥ |═══/\\_/\\\n▓░▒| ████ |  ( ^ω^ )\n▓░▒| ♥  ♥ |   nyaa~\n  '------'"
   ]},
 
-  // 2. BUSINESS CAT — deal with it
-  { name: "business cat", color: "#c4b5fd", speed: 700, frames: [
-    "  /\\_/\\  \n ( o.o ) \n  > ^ <  \n [suit]  \n\"deal w it\"",
-    "  /\\_/\\  \n ( -.- ) \n  > ^ <  \n [suit]  \n\"deal w it\"",
-    "  /\\_/\\  \n ( o.o ) \n  > ^ <  \n [suit]  \n\" ...    \"",
-    "  /\\_/\\  \n ( >.< ) \n  > ^ <  \n [suit]  \n\"DEAL WIT\""
+  // 2 · DANCING CAT — 8 moves, the main event
+  { name:"dance mode ♥", color:"#c4b5fd", speed:290, frames:[
+    "  /\\_/\\  \n ( ^w^ ) \n  )   (  \n /|   |\\ \n  |   |  \n  ~ ~ ~  ",
+    "  /\\_/\\  \n ( ^w^ )o\n  )   (  \n /|   |  \n  |      \n  ~ ~ ~  ",
+    "  /\\_/\\  \no( ^w^ ) \n  )   (  \n     ||\\ \n     |   \n  ~ ~ ~  ",
+    " o/\\_/\\o \n ( OwO ) \n  )   (  \n  |   |  \n  |   |  \n[hands up]",
+    "  /\\_/\\  \n ( *o* ) \n ~)   (~ \n  |   |  \n  ~ ~ ~  \n  SPIN~  ",
+    "  /\\_/\\  \n ( - - ) \n (     )>\n  | | |  \n <-<-<-  \nmoonwalk!",
+    "  /\\_/\\  \n ( OwO ) \n~( ~w~ )~\n  )   (  \n (_____) \n  ~ ~ ~  ",
+    "  /\\_/\\  \n (*^w^*) \n  o)  (o \n  |   |  \n (_) (_) \n♪ ♫ ♪   "
   ]},
 
-  // 3. CEILING CAT — watching you
-  { name: "ceiling cat", color: "#fcd34d", speed: 600, frames: [
-    "___________\n|  hole   |\n| /\\_/\\  |\n| (o . o) |\n|  > ^ <  |",
-    "___________\n|  hole   |\n| /\\_/\\  |\n| (O . O) |\n|  > ^ <  |",
-    "___________\n|  hole   |\n| /\\_/\\  |\n| (o . o) |\n|  > ^ <  |",
-    "___________\n|  hole   |\n| /\\_/\\  |\n| (-w-)   |\n|  > ^ <  |"
+  // 3 · ZOOMIES — build-up to full zoom
+  { name:"ZOOMIES!!!", color:"#6ee7b7", speed:200, frames:[
+    "   /\\_/\\ \n  ( o.o )\n   > ^ < \n  paws.. \n  ready. \n  . . .  ",
+    "  /\\_/\\  \n ( >.< ) \n ───────>\n ═══════>\n  ZOOM!! \n         ",
+    "    /\\_/\\\n   (° ° ) \n──────── \n════════ \n  FAST!! \n         ",
+    "         \n   /\\_/\\ \n  (°.°)>> \n ~~~~~~~~\n         \n  gone.  "
   ]},
 
-  // 4. GRUMPY CAT
-  { name: "grumpy cat", color: "#93c5fd", speed: 650, frames: [
-    "  /\\_/\\  \n ( -.-)  \n  > v <  \n \"NO.\"   ",
-    "  /\\_/\\  \n ( -,-)  \n  > v <  \n \"NO.\"   ",
-    "  /\\_/\\  \n ( -.-)  \n  > v <  \n\" still \"\n\"  NO.  \"",
-    "  /\\_/\\  \n ( -.-)  \n  > v <  \n \"NO.\"   "
+  // 4 · SPOOKED CAT — calm → notice → poof
+  { name:"spooked!", color:"#fcd34d", speed:350, frames:[
+    "  /\\_/\\ \n ( u.u )\n  > ^ < \n  calm.  \n         \n         ",
+    "  /\\_/\\ \n ( o.o )\n  > ^ < \n  ...??  \n  hears? \n         ",
+    "  /\\ /\\ \n ( O O )\n (=|||=) \n )     ( \n FUR:MAX \n  !!!!   ",
+    "  * . *  \n * (  ) *\n   \\  /  \n   /  \\  \n  *    * \n  poof!  "
   ]},
 
-  // 5. KEYBOARD CAT — playing the tune
-  { name: "keyboard cat", color: "#6ee7b7", speed: 250, frames: [
-    "  /\\_/\\   \n ( ^.^ )  \n  |   |   \n[__|___]  \n  ♪       ",
-    "  /\\_/\\   \n ( ^.^ )  \n  |   |   \n[___|__]  \n    ♪     ",
-    "  /\\_/\\   \n ( ^ω^ )  \n  |   |   \n[__|___]  \n  ♪  ♩    ",
-    "  /\\_/\\   \n ( ^.^ )  \n  |   |   \n[___|__]  \n    ♪ ♩   ",
-    "  /\\_/\\   \n ( ^ω^ )  \n  |   |   \n[__|___]  \n ♪ ♩  ♪   "
+  // 5 · LOAF CAT — very slow blink + suspicious stare
+  { name:"loaf cat", color:"#fca5a5", speed:800, frames:[
+    "   _____  \n  (     ) \n  ( -w- ) \n   \\___/  \n  I AM    \n  BREAD   ",
+    "   _____  \n  (     ) \n  ( --- ) \n   \\___/  \n          \n  . . .   ",
+    "   _____  \n  (     ) \n  ( ◕w◕ ) \n   \\___/  \n  i see   \n   you.   ",
+    "   _____  \n  (     ) \n  ( -w- ) \n   \\___/  \n  z Z Z z \n          "
   ]},
 
-  // 6. LONGCAT — he is long
-  { name: "longcat", color: "#fca5a5", speed: 400, frames: [
-    " /\\_/\\ \n(o . o)\n > ^ < \n  | |  \n  | |  \n  | |  \nvery long",
-    " /\\_/\\ \n(o . o)\n > ^ < \n  | |  \n  | |  \n  | |  \nso long! ",
-    " /\\_/\\ \n(-w- ) \n > ^ < \n  | |  \n  | |  \n  | |  \nvery long",
-    " /\\_/\\ \n(o . o)\n > ^ < \n  | |  \n  | |  \n  | |  \n he long  "
+  // 6 · KEYBOARD CAT — playing the tune
+  { name:"keyboard cat", color:"#6ee7b7", speed:250, frames:[
+    "  /\\_/\\  \n ( ^.^ ) \n  |   |  \n[__|___] \n  ♪      \n         ",
+    "  /\\_/\\  \n ( ^.^ ) \n  |   |  \n[___|__] \n    ♪    \n         ",
+    "  /\\_/\\  \n ( ^ω^ ) \n  |   |  \n[__|___] \n  ♪  ♩   \n         ",
+    "  /\\_/\\  \n ( ^.^ ) \n  |   |  \n[___|__] \n    ♪ ♩  \n         ",
+    "  /\\_/\\  \n ( ^ω^ ) \n  |   |  \n[__|___] \n ♪ ♩  ♪  \n         "
   ]},
 
-  // 7. MONORAIL CAT
-  { name: "monorail cat", color: "#fb923c", speed: 200, frames: [
-    "        /\\_/\\ \n~~~~~( >^.^< )~~~~~\n  monorail cat! ",
-    "       /\\_/\\  \n~~~~( >^.^< )~~~~~~\n  monorail cat! ",
-    "      /\\_/\\   \n~~~( >^.^< )~~~~~~~\n  monorail cat! ",
-    "     /\\_/\\    \n~~( >^.^< )~~~~~~~~\n  monorail cat! ",
-    "    /\\_/\\     \n~( >^.^< )~~~~~~~~~\n  monorail cat! ",
-    "   /\\_/\\      \n( >^.^< )~~~~~~~~~~\n  monorail cat! "
+  // 7 · POP CAT — open / close
+  { name:"pop cat", color:"#a78bfa", speed:180, frames:[
+    "  /\\_/\\  \n ( o.o ) \n  >___<  \n  closed \n         \n         ",
+    "  /\\_/\\  \n ( o.o ) \n  > O <  \n   POP!  \n         \n         ",
+    "  /\\_/\\  \n ( o.o ) \n  >___<  \n  closed \n         \n         ",
+    "  /\\_/\\  \n ( o.o ) \n  > O <  \n   POP!  \n         \n         ",
+    "  /\\_/\\  \n ( o.o ) \n  >___<  \n  closed \n         \n         ",
+    "  /\\_/\\  \n ( ^.^ ) \n  > O <  \n  POP!!  \n         \n         "
   ]},
 
-  // 8. POP CAT — open/close mouth
-  { name: "pop cat", color: "#a78bfa", speed: 200, frames: [
-    "  /\\_/\\  \n ( o.o ) \n  >___<  \n  closed ",
-    "  /\\_/\\  \n ( o.o ) \n  > O <  \n   POP! ",
-    "  /\\_/\\  \n ( o.o ) \n  >___<  \n  closed ",
-    "  /\\_/\\  \n ( o.o ) \n  > O <  \n   POP! ",
-    "  /\\_/\\  \n ( o.o ) \n  >___<  \n  closed ",
-    "  /\\_/\\  \n ( ^.^ ) \n  > O <  \n  POP!! "
+  // 8 · SMUDGE CAT — confused at the table
+  { name:"smudge cat", color:"#f9a8d4", speed:600, frames:[
+    " _______ \n| TABLE |\n|  /\\_/\\|\n| (o_O )|\n|_______|\n\"   ?   \"",
+    " _______ \n| TABLE |\n|  /\\_/\\|\n| (O_o )|\n|_______|\n\"  ??   \"",
+    " _______ \n| TABLE |\n|  /\\_/\\|\n| (o_O )|\n|_______|\n\" wut?  \"",
+    " _______ \n| TABLE |\n|  /\\_/\\|\n| (>_< )|\n|_______|\n\"  ???  \""
   ]},
 
-  // 9. SMUDGE CAT — the confused one at the table
-  { name: "smudge cat", color: "#f9a8d4", speed: 600, frames: [
-    " _______  \n| TABLE | \n|  /\\_/\\|\n| (o_O )|  \n|_______|  \n\"   ?   \"",
-    " _______  \n| TABLE | \n|  /\\_/\\|\n| (O_o )|  \n|_______|  \n\"  ??   \"",
-    " _______  \n| TABLE | \n|  /\\_/\\|\n| (o_O )|  \n|_______|  \n\" wut?  \"",
-    " _______  \n| TABLE | \n|  /\\_/\\|\n| (>_< )|  \n|_______|  \n\"  ???  \""
+  // 9 · LOFI KITTY — chill studying
+  { name:"lofi kitty", color:"#f9a8d4", speed:700, frames:[
+    "  /\\_/\\ \n ( o.o )\n  > ^ < \n (_____)  \n         \n         ",
+    "  /\\_/\\ \n ( -.- )\n  > ^ < \n (_____)  \n z . .   \n         ",
+    "  /\\_/\\ \n ( o.o )\n  > ^ < \n (_____)  \n         \n         ",
+    "  /\\_/\\ \n ( ^.^ )\n  > ^ < \n (_____)  \n  ♪      \n         "
   ]},
 
-  // 10. ORIGINAL 9 — sitting lofi
-  { name: "lofi kitty", color: "#f9a8d4", speed: 700, frames: [
-    "  /\\_/\\ \n ( o.o )\n  > ^ <\n (_____)  ",
-    "  /\\_/\\ \n ( -.- )\n  > ^ <\n (_____)  ",
-    "  /\\_/\\ \n ( o.o )\n  > ^ <\n (_____)  ",
-    "  /\\_/\\ \n ( ^.^ )\n  > ^ <\n (_____)  "
+  // 10 · GRUMPY CAT — NO.
+  { name:"grumpy cat", color:"#93c5fd", speed:650, frames:[
+    "  /\\_/\\  \n ( -.-) \n  > v <  \n  \"NO.\" \n         \n         ",
+    "  /\\_/\\  \n ( -,-) \n  > v <  \n  \"NO.\" \n         \n         ",
+    "  /\\_/\\  \n ( -.-) \n  > v <  \n \"still\"\n \" NO.\" \n         ",
+    "  /\\_/\\  \n ( -.-) \n  > v <  \n  \"NO.\" \n         \n         "
   ]},
 
-  // 11. dancing
-  { name: "dance mode", color: "#c4b5fd", speed: 300, frames: [
-    "  /\\_/\\ \n ( ^ω^ )\n  /|  |\\\n  \" \"  ",
-    " \\( ^ω^ )\n  /|  |\\\n  \" \"    ",
-    "  /\\_/\\ \n ( ^ω^ )/\n  |\\   \n  \" \"   ",
-    "  /\\_/\\ \n\\( ^ω^ )\n    /|\n  \" \"   "
+  // 11 · RAVE CAT — party time
+  { name:"rave cat ★", color:"#f0abfc", speed:150, frames:[
+    "  . ★ .  \n /\\_/\\  \n(>^  ^<) \n\\(    )/ \n  |  |   \n ~~~★~~~ ",
+    "  ★ . ★  \n /\\_/\\  \n(*^  ^*) \n (    )  \n /|  |\\ \n ~~~★~~~ ",
+    "  . ★ .  \n /\\_/\\  \n(>^  ^<) \n/(    )\\ \n  |  |   \n ~~~★~~~ ",
+    "  ★ . ★  \n /\\_/\\  \n(≧ ω ≦) \n\\(    )/ \n  |  |   \n BASS!!! "
   ]},
 
-  // 12. sleepy
-  { name: "nap time", color: "#6ee7b7", speed: 900, frames: [
-    "  /\\_/\\ \n ( -.- )\n  > ^ <\n  zzz...",
-    "  /\\_/\\ \n ( _._ )\n  > ^ <\n   zzz..",
-    "  /\\_/\\ \n ( -.- )\n  > ^ <\n    zzz.",
-    "  /\\_/\\ \n ( -.- )\n  > ^ <\n  z z z "
+  // 12 · BUSINESS CAT — deal with it
+  { name:"business cat", color:"#c4b5fd", speed:700, frames:[
+    "  /\\_/\\  \n ( o.o ) \n  > ^ <  \n [suit]  \n\"deal    \"\n\"with it\"",
+    "  /\\_/\\  \n ( -.- ) \n  > ^ <  \n [suit]  \n\"deal    \"\n\"with it\"",
+    "  /\\_/\\  \n ( o.o ) \n  > ^ <  \n [suit]  \n\" ...    \"\n          ",
+    "  /\\_/\\  \n ( >.< ) \n  > ^ <  \n [suit]  \n\"DEAL WIT\"\n\" IT!!!  \""
   ]},
 
-  // 13. typing
-  { name: "on the grind", color: "#a78bfa", speed: 200, frames: [
-    "  /\\_/\\ \n ( >_< )\n  | |   \n [___|__]",
-    "  /\\_/\\ \n ( >_< )\n  | |   \n [__|___]",
-    "  /\\_/\\ \n ( -_- )\n  | |   \n [___|__]",
-    "  /\\_/\\ \n ( >_< )\n  | |   \n [__|___]"
+  // 13 · MONORAIL CAT — zooming through
+  { name:"monorail cat", color:"#fb923c", speed:190, frames:[
+    "         \n       /\\_/\\ \n~~~~~( >^.^<)~~~~~\n  monorail cat!\n         \n         ",
+    "         \n      /\\_/\\  \n~~~~( >^.^<)~~~~~~\n  monorail cat!\n         \n         ",
+    "         \n     /\\_/\\   \n~~~( >^.^<)~~~~~~~\n  monorail cat!\n         \n         ",
+    "         \n    /\\_/\\    \n~~( >^.^<)~~~~~~~~\n  monorail cat!\n         \n         ",
+    "         \n   /\\_/\\     \n~( >^.^<)~~~~~~~~~\n  monorail cat!\n         \n         ",
+    "         \n  /\\_/\\      \n( >^.^<)~~~~~~~~~~\n  monorail cat!\n         \n         "
   ]},
 
-  // 14. heart eyes
-  { name: "in love", color: "#fca5a5", speed: 500, frames: [
-    "  /\\_/\\ \n ( ♥.♥ )\n  > ^ <\n  ~♡~   ",
-    "  /\\_/\\ \n ( ♥ω♥ )\n  > ^ <\n  ~♡~   ",
-    "  /\\_/\\ \n ( ♥.♥ )\n  > ^ <\n  ~♡♡~  ",
-    "  /\\_/\\ \n ( ^.^ )\n  > ^ <\n  ~♡~   "
+  // 14 · CEILING CAT — watching you
+  { name:"ceiling cat", color:"#fcd34d", speed:600, frames:[
+    "___________ \n|  hole   | \n| /\\_/\\  | \n| (o . o) | \n|  > ^ <  | \n          ",
+    "___________ \n|  hole   | \n| /\\_/\\  | \n| (O . O) | \n|  > ^ <  | \n          ",
+    "___________ \n|  hole   | \n| /\\_/\\  | \n| (o . o) | \n|  > ^ <  | \n          ",
+    "___________ \n|  hole   | \n| /\\_/\\  | \n| (-w-)   | \n|  > ^ <  | \nwatching! "
+  ]},
+
+  // 15 · HEART EYES — in love
+  { name:"in love", color:"#fca5a5", speed:500, frames:[
+    "  /\\_/\\ \n ( ♥.♥ )\n  > ^ < \n  ~♡~   \n         \n         ",
+    "  /\\_/\\ \n ( ♥ω♥ )\n  > ^ < \n  ~♡~   \n         \n         ",
+    "  /\\_/\\ \n ( ♥.♥ )\n  > ^ < \n  ~♡♡~  \n         \n         ",
+    "  /\\_/\\ \n ( ^.^ )\n  > ^ < \n  ~♡~   \n         \n         "
+  ]},
+
+  // 16 · SLEEPY CAT — nap time
+  { name:"nap time", color:"#86efac", speed:900, frames:[
+    "  /\\_/\\ \n ( -.- )\n  > ^ < \n  zzz... \n         \n         ",
+    "  /\\_/\\ \n ( _._ )\n  > ^ < \n   zzz.. \n         \n         ",
+    "  /\\_/\\ \n ( -.- )\n  > ^ < \n    zzz. \n         \n         ",
+    "  /\\_/\\ \n ( -.- )\n  > ^ < \n  z z z  \n         \n         "
   ]}
 ];
 
@@ -513,20 +530,32 @@ function showCatFrame(){
   curFrame = (curFrame + 1) % cat.frames.length;
 }
 
-function startCat(){
+function startCat(fade){
   if(frameTimer) clearInterval(frameTimer);
   curFrame = 0;
-  showCatFrame();
-  var spd = ASCII_CATS[curCat].speed || 600;
-  frameTimer = setInterval(showCatFrame, spd);
+  if(fade){
+    catPre.style.opacity = '0';
+    setTimeout(function(){
+      showCatFrame();
+      catPre.style.opacity = '1';
+      var spd = ASCII_CATS[curCat].speed || 600;
+      frameTimer = setInterval(showCatFrame, spd);
+    }, 180);
+  } else {
+    showCatFrame();
+    var spd = ASCII_CATS[curCat].speed || 600;
+    frameTimer = setInterval(showCatFrame, spd);
+  }
 }
 
 function nextCat(){
   curCat = (curCat + 1) % ASCII_CATS.length;
-  startCat();
+  clearInterval(catTimer);
+  startCat(true);
+  catTimer = setInterval(nextCat, 8000);
 }
 
-startCat();
+startCat(false);
 catTimer = setInterval(nextCat, 8000);
 
 // ── ASCII VISUALIZER — per-column spans, colorful ────────────
