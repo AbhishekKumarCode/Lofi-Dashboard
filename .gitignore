@@ -31,3 +31,6 @@ dashboard-server/settings.json
 # Control panel build output and deps
 control-panel/dist/
 control-panel/node_modules/
+
+# Never commit built binaries
+*.exe
