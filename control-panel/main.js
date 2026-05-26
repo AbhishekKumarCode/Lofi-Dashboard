@@ -3,22 +3,21 @@
 //  main.js  (Electron main process)
 // ============================================================
 const { app, BrowserWindow, ipcMain, shell } = require('electron');
-const { spawn } = require('child_process');
 const path = require('path');
 const fs   = require('fs');
 
 let win        = null;
-let serverProc = null;
+let serverStarted = false;
 
-// ── Find server.js ───────────────────────────────────────────
-function findServer() {
-  const candidates = [
-    path.join(path.dirname(process.execPath), '..', 'dashboard-server', 'server.js'),
-    path.join(path.dirname(process.execPath), 'dashboard-server', 'server.js'),
-    path.join(__dirname, '..', 'dashboard-server', 'server.js'),
-    'C:\\Lofi-Dashboard\\dashboard-server\\server.js',
-  ];
-  return candidates.find(p => { try { return fs.existsSync(p); } catch { return false; } }) || '';
+// ── Path helpers ─────────────────────────────────────────────
+function getStaticDir() {
+  return app.isPackaged
+    ? path.join(process.resourcesPath, 'dashboard-server')
+    : path.join(__dirname, '..', 'dashboard-server');
+}
+
+function getSettingsPath() {
+  return path.join(app.getPath('userData'), 'settings.json');
 }
 
 // ── Send to renderer safely ───────────────────────────────────
@@ -26,32 +25,34 @@ function send(ch, ...args) {
   if (win && !win.isDestroyed()) win.webContents.send(ch, ...args);
 }
 
-// ── Server control ───────────────────────────────────────────
+// ── Server control (in-process) ───────────────────────────────
 function startServer() {
-  if (serverProc) return;
-  const serverJs = findServer();
-  if (!serverJs) {
-    send('log', '[panel] ❌ server.js not found\n');
+  if (serverStarted) return;
+  serverStarted = true;
+
+  const staticDir   = getStaticDir();
+  const settingsPath = getSettingsPath();
+
+  send('log', `[panel] staticDir  → ${staticDir}\n`);
+  send('log', `[panel] settings   → ${settingsPath}\n`);
+
+  if (!fs.existsSync(staticDir)) {
+    send('log', `[panel] ❌ Dashboard files not found at ${staticDir}\n`);
     send('status', 'error');
     return;
   }
-  send('log', `[panel] starting → ${serverJs}\n`);
-  serverProc = spawn('node', [serverJs], { cwd: path.dirname(serverJs), env: process.env });
-  serverProc.stdout.on('data', d => send('log', d.toString()));
-  serverProc.stderr.on('data', d => send('log', '[err] ' + d.toString()));
-  serverProc.on('exit', code => {
-    serverProc = null;
-    send('log', `[panel] server stopped (${code})\n`);
-    send('status', 'stopped');
-  });
-  send('status', 'running');
-}
 
-function stopServer() {
-  if (!serverProc) return;
-  serverProc.kill();
-  serverProc = null;
-  send('status', 'stopped');
+  try {
+    const startServerFn = require('./server-runner.js');
+    startServerFn(staticDir, settingsPath, function(port) {
+      send('log', `[panel] ✅ Server running → http://localhost:${port}\n`);
+      send('log', `[panel] 📱 Open on tablet  → http://192.168.1.13:${port}\n`);
+      send('status', 'running');
+    });
+  } catch (err) {
+    send('log', `[panel] ❌ Failed to start server: ${err.message}\n`);
+    send('status', 'error');
+  }
 }
 
 // ── Window ───────────────────────────────────────────────────
@@ -76,13 +77,12 @@ app.whenReady().then(() => {
   createWindow();
   win.webContents.once('did-finish-load', () => startServer());
 });
-app.on('before-quit', stopServer);
-app.on('window-all-closed', () => { stopServer(); app.quit(); });
+app.on('window-all-closed', () => app.quit());
 
 // ── IPC ──────────────────────────────────────────────────────
-ipcMain.on('win-close',      () => { stopServer(); win && win.close(); });
+ipcMain.on('win-close',      () => { win && win.close(); app.quit(); });
 ipcMain.on('win-minimize',   () => win && win.minimize());
 ipcMain.on('server-start',   () => startServer());
-ipcMain.on('server-stop',    () => stopServer());
-ipcMain.on('server-restart', () => { stopServer(); setTimeout(startServer, 500); });
+ipcMain.on('server-stop',    () => send('log', '[panel] Server runs for the lifetime of this app.\n'));
+ipcMain.on('server-restart', () => send('log', '[panel] Restart: close and reopen the app.\n'));
 ipcMain.on('open-dashboard', () => shell.openExternal('http://192.168.1.13:3000'));
